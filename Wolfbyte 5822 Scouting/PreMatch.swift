@@ -11,27 +11,6 @@ import SpriteKit
 import MultipeerConnectivity
 
 class PreMatch : SKScene, MCSessionDelegate {
-    var data = [PreMatchData]()
-    
-    var filePath : String {
-        let manager = FileManager.default
-        let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first
-        return url!.appendingPathComponent("Data").path
-    }
-    private func loadData() {
-        if let ourData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as? [PreMatchData] {
-            data = ourData
-        }
-    }
-    private func saveData(preMatchData: PreMatchData) {
-        data.removeAll()
-        data.append(preMatchData)
-        NSKeyedArchiver.archiveRootObject(data, toFile: filePath)
-    }
-    
-    
-    
-    
     
     var connected = false
     var childrenAdded = false
@@ -40,7 +19,6 @@ class PreMatch : SKScene, MCSessionDelegate {
     var enterTeamNumber = UITextField()
     var enterYourName = UITextField()
     var tag = 0
-    var currentData : PreMatchData?
     var completeDataString = NSMutableString()
     var themedButton = ThemedButton()
     var controller = UIDocumentInteractionController()
@@ -54,6 +32,35 @@ class PreMatch : SKScene, MCSessionDelegate {
     var allianceString = ""
     var robotNumber = ""
     var nameString = ""
+    
+    
+    var autonomousDiv = SKShapeNode()
+    var teleopDiv = SKShapeNode()
+    var autoLabel = SKLabelNode()
+    var teleopLabel = SKLabelNode()
+    var logo = SKSpriteNode()
+    var logoLabel = SKLabelNode()
+    var zoneKey = SKSpriteNode()
+    var zoneKeyLabel  = SKLabelNode()
+    var didNotMoveLabel = SKLabelNode()
+    var didNotMoveBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var crossBaseLineLabel = SKLabelNode()
+    var crossBaseLineBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var attemptGearLabel = SKLabelNode()
+    var attemptGearBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var madeGearLabel = SKLabelNode()
+    var madeGearBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var attemptShotLabel = SKLabelNode()
+    var attemptShotBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var zoneLabel = SKLabelNode()
+    var zone1Label = SKLabelNode()
+    var zone2Label = SKLabelNode()
+    var zone3Label = SKLabelNode()
+    var estimatedShotAccuracy = UITextField()
+    var attemptHopperLabel = SKLabelNode()
+    var attemptHopperBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    
+    
     
     var actInd = UIActivityIndicatorView()
     
@@ -70,20 +77,17 @@ class PreMatch : SKScene, MCSessionDelegate {
     }
     
     override func didMove(to view: SKView) {
-        let sceneWidth = self.frame.height
+        let sceneWidth = self.frame.width
         let sceneHeight = self.frame.height
         
-        loadData()
-        if data.isEmpty == false {
-            currentData = data[0]
-            tag = (currentData?.currentPosTag)!
-            completeDataString = (currentData?.arrayToSave)!
+        let defaults = UserDefaults.standard
+        if defaults.integer(forKey: "tag") < 1 {
+            tag = 1
+            defaults.set(tag, forKey: "tag")
+            defaults.synchronize()
         }
         else {
-            tag = 1
-            completeDataString.append("Alliance Color, Robot #, Scout Name\n")
-            currentData = PreMatchData(array: completeDataString)
-            currentData?.currentPosTag = tag
+            tag = defaults.integer(forKey: "tag")
         }
         
         backgroundColor = UIColor(netHex: 0x7A3E48)
@@ -95,11 +99,10 @@ class PreMatch : SKScene, MCSessionDelegate {
         titleLabel.fontColor = UIColor(netHex: 0xEECD86)
         titleLabel.zPosition = 1
         adjustLabelFontSizeToFitRect(labelNode: titleLabel, rect: titleLabelRect)
-        self.addChild(titleLabel)
         
         showActivityIndicatory(uiView: self.view!)
         
-        enterMatchAlliance = UITextField(frame: CGRect(x: view.center.x - titleLabelRect.width, y: titleLabelRect.midY - (sceneWidth/1.5), width: titleLabelRect.width * 2, height: titleLabelRect.height/2))
+        enterMatchAlliance = UITextField(frame: CGRect(x: view.center.x - titleLabelRect.width, y: titleLabelRect.midY - (sceneHeight/1.5), width: titleLabelRect.width * 2, height: titleLabelRect.height/2))
         enterMatchAlliance.placeholder = "Enter Match Alliance"
         enterMatchAlliance.borderStyle = .roundedRect
         enterMatchAlliance.backgroundColor = UIColor(netHex: 0xEECD86)
@@ -125,6 +128,122 @@ class PreMatch : SKScene, MCSessionDelegate {
         
         themedButton = ThemedButton(size: titleLabelRect.size, x: titleLabel.position.x, y: sceneHeight/6, name: "Next")
         
+        
+        autonomousDiv = SKShapeNode(rectOf: CGSize(width: sceneWidth, height: sceneHeight/3))
+        autonomousDiv.position = CGPoint(x: view.center.x, y: sceneHeight - (sceneHeight/3/2))
+        autonomousDiv.fillColor = UIColor(netHex: 0x7A3E48)
+        autonomousDiv.strokeColor = autonomousDiv.fillColor
+        autonomousDiv.zPosition = 1
+        
+        teleopDiv = SKShapeNode(rectOf: CGSize(width: sceneWidth, height: sceneHeight - sceneHeight/3))
+        teleopDiv.position = CGPoint(x: sceneWidth/2, y: sceneHeight - sceneHeight/3 - teleopDiv.frame.height/2)
+        teleopDiv.fillColor = UIColor(netHex: 0xEECD86)
+        teleopDiv.strokeColor = teleopDiv.fillColor
+        teleopDiv.zPosition = 1
+        
+        logo = SKSpriteNode(imageNamed: "wolfbyteLogo")
+        logo.size = CGSize(width: sceneWidth/8, height: sceneWidth/8)
+        logo.position = CGPoint(x: sceneWidth - sceneHeight/10, y: sceneHeight - sceneHeight/10)
+        logo.zPosition = 2
+        
+        let logoLabelRect = CGRect(x: sceneWidth - sceneHeight/10, y: logo.position.y - logo.size.height/2 - sceneWidth/20, width: logo.size.width, height: logo.size.height/5)
+        logoLabel.text = "Wolfbyte 5822"
+        logoLabel.fontColor = UIColor(netHex: 0xEECD86)
+        logoLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: logoLabel, rect: logoLabelRect)
+        logoLabel.position = CGPoint(x: logoLabelRect.minX, y: logoLabelRect.midY)
+        logoLabel.zPosition = 2
+        
+        zoneKey = SKSpriteNode(imageNamed: "zoneKey")
+        zoneKey.size = CGSize(width: sceneWidth/8, height: sceneWidth/8)
+        zoneKey.position = CGPoint(x: logo.position.x - logo.size.width - sceneWidth/10, y: logo.position.y)
+        zoneKey.zPosition = 2
+        
+        let zoneKeyLabelRect = CGRect(x: zoneKey.position.x, y: zoneKey.position.y - zoneKey.size.height/2 - sceneWidth/20, width: zoneKey.size.width, height: zoneKey.size.height/5)
+        zoneKeyLabel.text = "Zone Key"
+        zoneKeyLabel.fontColor = UIColor(netHex: 0xEECD86)
+        zoneKeyLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: zoneKeyLabel, rect: zoneKeyLabelRect)
+        zoneKeyLabel.position = CGPoint(x: zoneKeyLabelRect.minX, y: zoneKeyLabelRect.midY)
+        zoneKeyLabel.zPosition = 2
+        
+        
+        
+        let autoLabelRect = CGRect(x: sceneWidth/10, y: sceneHeight - sceneHeight/10, width: sceneWidth/10, height: sceneHeight/10)
+        autoLabel.text = "Autonomous"
+        autoLabel.fontColor = UIColor(netHex: 0xEECD86)
+        autoLabel.fontName = "Arial-Bold"
+        adjustLabelFontSizeToFitRect(labelNode: autoLabel, rect: autoLabelRect)
+        autoLabel.position = CGPoint(x: sceneWidth/10, y: sceneHeight - sceneHeight/20)
+        autoLabel.zPosition = 2
+        
+        let didNotMoveLabelRect = CGRect(x: sceneWidth/10, y: autoLabelRect.midY - autoLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        didNotMoveLabel.text = "Did Not Move:"
+        didNotMoveLabel.fontColor = UIColor(netHex: 0xEECD86)
+        didNotMoveLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: didNotMoveLabel, rect: didNotMoveLabelRect)
+        didNotMoveLabel.position = CGPoint(x: sceneWidth/10, y: autoLabelRect.midY - autoLabelRect.height/2)
+        didNotMoveLabel.zPosition = 2
+        
+        didNotMoveBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "DidNotMoveBox")
+        didNotMoveBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: didNotMoveLabelRect.midY + sceneWidth/200)
+        didNotMoveBox.node.zPosition = 2
+        didNotMoveBox.adjustSize()
+        
+        let crossBaseLineRect = CGRect(x: sceneWidth/10, y: didNotMoveLabelRect.midY-didNotMoveLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        crossBaseLineLabel.text = "Crossed Base Line:"
+        crossBaseLineLabel.fontName = "Arial"
+        crossBaseLineLabel.fontColor = UIColor(netHex: 0xEECD86)
+        adjustLabelFontSizeToFitRect(labelNode: crossBaseLineLabel, rect: crossBaseLineRect)
+        crossBaseLineLabel.position = CGPoint(x: crossBaseLineRect.minX, y: crossBaseLineRect.midY)
+        crossBaseLineLabel.zPosition = 2
+        
+        crossBaseLineBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "CrossBaseLineBox")
+        crossBaseLineBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: crossBaseLineRect.midY + sceneWidth/200)
+        crossBaseLineBox.node.zPosition = 2
+        crossBaseLineBox.adjustSize()
+        
+        let attemptGearLabelRect = CGRect(x: sceneWidth/10, y: crossBaseLineRect.midY-crossBaseLineRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        attemptGearLabel.text = "Attempted Gear?:"
+        attemptGearLabel.fontName = "Arial"
+        attemptGearLabel.fontColor = UIColor(netHex: 0xEECD86)
+        adjustLabelFontSizeToFitRect(labelNode: attemptGearLabel, rect: attemptGearLabelRect)
+        attemptGearLabel.position = CGPoint(x: attemptGearLabelRect.minX, y: attemptGearLabelRect.midY)
+        attemptGearLabel.zPosition = 2
+        
+        attemptGearBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "AttemptGearBox")
+        attemptGearBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: attemptGearLabelRect.midY + sceneWidth/200)
+        attemptGearBox.node.zPosition = 2
+        attemptGearBox.adjustSize()
+        
+        let madeGearLabelRect = CGRect(x: attemptGearLabelRect.maxX + sceneWidth/20, y: attemptGearLabelRect.midY, width: sceneWidth/10, height: sceneHeight/10)
+        madeGearLabel.text = "Made Gear?:"
+        madeGearLabel.fontName = "Arial"
+        madeGearLabel.fontColor = UIColor(netHex: 0xEECD86)
+        adjustLabelFontSizeToFitRect(labelNode: madeGearLabel, rect: madeGearLabelRect)
+        madeGearLabel.position = CGPoint(x: madeGearLabelRect.minX, y: madeGearLabelRect.midY - madeGearLabelRect.height/2)
+        madeGearLabel.zPosition = 2
+        
+        madeGearBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "MadeGearBox")
+        madeGearBox.setPosition(x: madeGearLabelRect.minX + sceneWidth/15, y: madeGearLabelRect.midY - madeGearBox.node.frame.height)
+        madeGearBox.node.zPosition = 2
+        madeGearBox.adjustSize()
+        
+        let attemptShotLabelRect = CGRect(x: didNotMoveLabelRect.maxX + sceneWidth/20, y: didNotMoveLabelRect.midY, width: sceneWidth/10, height: sceneHeight/10)
+        attemptShotLabel.text = "Attempt Shot?:"
+        attemptShotLabel.fontName = "Arial"
+        attemptShotLabel.fontColor = UIColor(netHex: 0xEECD86)
+        adjustLabelFontSizeToFitRect(labelNode: attemptShotLabel, rect: attemptShotLabelRect)
+        attemptShotLabel.position = CGPoint(x: attemptShotLabelRect.minX, y: attemptShotLabelRect.midY - madeGearLabelRect.height/2)
+        attemptShotLabel.zPosition = 2
+        
+        attemptShotBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "AttemptShotBox")
+        attemptShotBox.setPosition(x: attemptShotLabelRect.minX + sceneWidth/15, y: attemptShotLabelRect.midY - attemptShotBox.node.frame.height)
+        attemptShotBox.node.zPosition = 2
+        attemptShotBox.adjustSize()
+    
+        let
+        
         self.peerID = MCPeerID(displayName: UIDevice.current.name)
         self.session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: MCEncryptionPreference.none)
         self.session.delegate = self
@@ -147,60 +266,81 @@ class PreMatch : SKScene, MCSessionDelegate {
         
         if let name = touchedNode.name
         {
-            var sendingString = Data()
             if name == "Next"
             {
                 if tag == 1 {
-                    sendingString = (self.enterMatchAlliance.text?.data(using: String.Encoding.utf8,
-                                                                        allowLossyConversion: false))!
                     allianceString = enterMatchAlliance.text!
                     enterMatchAlliance.removeFromSuperview()
+                    UserDefaults.standard.set(allianceString, forKey: "AllianceString")
+                    UserDefaults.standard.synchronize()
                     self.view?.addSubview(enterTeamNumber)
                     tag = 2
-                    currentData?.currentPosTag = tag
+                    UserDefaults.standard.set(tag, forKey: "tag")
+                    UserDefaults.standard.synchronize()
                 }
                 else if tag == 2 {
-                    sendingString = (self.enterTeamNumber.text?.data(using: String.Encoding.utf8,
-                                                                     allowLossyConversion: false))!
+                    let aDefault = UserDefaults.standard
                     robotNumber = enterTeamNumber.text!
+                    aDefault.set(robotNumber, forKey: "RobotNumber")
+                    aDefault.synchronize()
                     enterTeamNumber.removeFromSuperview()
                     self.view?.addSubview(enterYourName)
                     tag = 3
-                    currentData?.currentPosTag = tag
+                    UserDefaults.standard.set(tag, forKey: "tag")
+                    UserDefaults.standard.synchronize()
                 }
                 else if tag == 3 {
-                    sendingString = (self.enterYourName.text?.data(using: String.Encoding.utf8, allowLossyConversion: false))!
+                    let aDefault = UserDefaults.standard
                     nameString = enterYourName.text!
+                    aDefault.set(nameString, forKey: "NameString")
+                    aDefault.synchronize()
                     enterYourName.removeFromSuperview()
                     tag = 4
-                    currentData?.currentPosTag = tag
-                }
-                else if tag == 4 {
+                    UserDefaults.standard.set(tag, forKey: "tag")
+                    UserDefaults.standard.synchronize()
+                    
                     completeDataString.append("\(allianceString), \(robotNumber), \(nameString)\n")
-                    let file = "File.csv"
-                    if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                        
-                        let path = dir.appendingPathComponent(file)
-                        
-                        //writing
-                        do {
-                            try completeDataString.write(to: path, atomically: false, encoding: String.Encoding.utf8.rawValue)
-                        }
-                        catch {/* error handling here */}
-                        controller = UIDocumentInteractionController(url: path)
-                    controller.presentOpenInMenu(from: CGRect(x:0,y:0,width:400,height:400), in: self.view!, animated: true)
-                    }
-                }
-                do {
-                    try self.session.send(sendingString, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
                     
-                    saveData(preMatchData: currentData!)
-                    
-                }
-                catch {
-                    print("ERROR")
-                }
+                    let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
+                    do {
+                        try self.session.send(completeString!, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
 
+                    }
+                    catch {
+                        print("ERROR")
+                    }
+                    
+                    self.removeAllChildren()
+                    self.addChild(autonomousDiv)
+                    self.addChild(teleopDiv)
+                    self.addChild(logo)
+                    self.addChild(zoneKey)
+                    self.addChild(zoneKeyLabel)
+                    self.addChild(logoLabel)
+                    self.addChild(autoLabel)
+                    self.addChild(didNotMoveLabel)
+                    self.addChild(didNotMoveBox.node)
+                    self.addChild(crossBaseLineLabel)
+                    self.addChild(crossBaseLineBox.node)
+                    self.addChild(attemptGearLabel)
+                    self.addChild(attemptGearBox.node)
+                    self.addChild(madeGearLabel)
+                    self.addChild(madeGearBox.node)
+                    self.addChild(attemptShotLabel)
+                    self.addChild(attemptShotBox.node)
+                }
+            }
+            if name == "DidNotMoveBox" {
+                didNotMoveBox.changeValue()
+            }
+            if name == "CrossBaseLineBox" {
+                crossBaseLineBox.changeValue()
+            }
+            if name == "AttemptGearBox" {
+                attemptGearBox.changeValue()
+            }
+            if name == "MadeGearBox" {
+                madeGearBox.changeValue()
             }
         }
 
@@ -209,16 +349,49 @@ class PreMatch : SKScene, MCSessionDelegate {
     func addChildren() {
         actInd.removeFromSuperview()
         if tag == 1 {
+            self.addChild(titleLabel)
             view?.addSubview(enterMatchAlliance)
+            self.addChild(themedButton.button)
+            self.addChild(themedButton.label)
+
         }
         else if tag == 2 {
+            self.addChild(titleLabel)
+            let defaults = UserDefaults.standard
+            let loadedString = defaults.string(forKey: "AllianceString")
+            allianceString = loadedString!
             view?.addSubview(enterTeamNumber)
+            self.addChild(themedButton.button)
+            self.addChild(themedButton.label)
         }
         else if tag == 3 {
+            self.addChild(titleLabel)
+            let defaults = UserDefaults.standard
+            let loadedString = defaults.string(forKey: "RobotNumber")
+            robotNumber = loadedString!
             view?.addSubview(enterYourName)
+            self.addChild(themedButton.button)
+            self.addChild(themedButton.label)
         }
-        self.addChild(themedButton.button)
-        self.addChild(themedButton.label)
+        else if tag == 4 {
+            self.addChild(autonomousDiv)
+            self.addChild(teleopDiv)
+            self.addChild(logo)
+            self.addChild(zoneKey)
+            self.addChild(zoneKeyLabel)
+            self.addChild(logoLabel)
+            self.addChild(autoLabel)
+            self.addChild(didNotMoveLabel)
+            self.addChild(didNotMoveBox.node)
+            self.addChild(crossBaseLineLabel)
+            self.addChild(crossBaseLineBox.node)
+            self.addChild(attemptGearLabel)
+            self.addChild(attemptGearBox.node)
+            self.addChild(madeGearLabel)
+            self.addChild(madeGearBox.node)
+            self.addChild(attemptShotLabel)
+            self.addChild(attemptShotBox.node)
+        }
     }
     
     func showActivityIndicatory(uiView: UIView) {
@@ -258,6 +431,7 @@ class PreMatch : SKScene, MCSessionDelegate {
         if state == .connected {
             connected = true
         }
+            /*
         else if state == .connecting || state == .notConnected {
             if childrenAdded == true {
                 if tag == 0 {
@@ -281,14 +455,12 @@ class PreMatch : SKScene, MCSessionDelegate {
                 childrenAdded = false
             }
         }
+ */
     }
     func session(_ session: MCSession, didReceive data: Data,
                  fromPeer peerID: MCPeerID)  {
         // Called when a peer sends an NSData to us
 
-    }
-    func proceedToMain() -> Void {
-        
     }
     
 }
