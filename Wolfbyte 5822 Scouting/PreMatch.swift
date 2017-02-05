@@ -54,11 +54,26 @@ class PreMatch : SKScene, MCSessionDelegate {
     var attemptShotBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
     var zoneLabel = SKLabelNode()
     var zone1Label = SKLabelNode()
+    var zone1Box = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
     var zone2Label = SKLabelNode()
+    var zone2Box = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
     var zone3Label = SKLabelNode()
-    var estimatedShotAccuracy = UITextField()
+    var zone3Box = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var estimatedFuelMadeLabel = SKLabelNode()
+    var estimatedFuelMade = UITextField()
     var attemptHopperLabel = SKLabelNode()
     var attemptHopperBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    
+    var didNotMoveValue = 0
+    var crossBaseLineValue = 0
+    var attemptGearValue = 0
+    var madeGearValue = 0
+    var attemptShotValue = 0
+    var zone1Value = 0
+    var zone2Value = 0
+    var zone3Value = 0
+    var estimatedFuelValue = 0
+    
     
     
     
@@ -79,15 +94,36 @@ class PreMatch : SKScene, MCSessionDelegate {
     override func didMove(to view: SKView) {
         let sceneWidth = self.frame.width
         let sceneHeight = self.frame.height
+
         
         let defaults = UserDefaults.standard
         if defaults.integer(forKey: "tag") < 1 {
             tag = 1
             defaults.set(tag, forKey: "tag")
+            
+            defaults.set(didNotMoveValue, forKey: "didNotMove")
+            defaults.set(crossBaseLineValue, forKey: "crossBaseLine")
+            defaults.set(attemptGearValue, forKey: "attemptGear")
+            defaults.set(madeGearValue, forKey: "madeGear")
+            defaults.set(attemptShotValue, forKey: "attemptShot")
+            defaults.set(zone1Value, forKey: "zone1")
+            defaults.set(zone2Value, forKey: "zone2")
+            defaults.set(zone3Value, forKey: "zone3")
+            defaults.set(estimatedFuelValue, forKey: "estimatedFuel")
             defaults.synchronize()
         }
         else {
             tag = defaults.integer(forKey: "tag")
+            didNotMoveValue = defaults.integer(forKey: "didNotMove")
+            crossBaseLineValue = defaults.integer(forKey: "crossBaseLine")
+            attemptGearValue = defaults.integer(forKey: "attemptGear")
+            madeGearValue = defaults.integer(forKey: "madeGear")
+            attemptShotValue = defaults.integer(forKey: "attemptShot")
+            zone1Value = defaults.integer(forKey: "zone1")
+            zone2Value = defaults.integer(forKey: "zone2")
+            zone3Value = defaults.integer(forKey: "zone3")
+            estimatedFuelValue = defaults.integer(forKey: "estimatedFuel")
+            
         }
         
         backgroundColor = UIColor(netHex: 0x7A3E48)
@@ -145,6 +181,7 @@ class PreMatch : SKScene, MCSessionDelegate {
         logo.size = CGSize(width: sceneWidth/8, height: sceneWidth/8)
         logo.position = CGPoint(x: sceneWidth - sceneHeight/10, y: sceneHeight - sceneHeight/10)
         logo.zPosition = 2
+        logo.name = "Logo"
         
         let logoLabelRect = CGRect(x: sceneWidth - sceneHeight/10, y: logo.position.y - logo.size.height/2 - sceneWidth/20, width: logo.size.width, height: logo.size.height/5)
         logoLabel.text = "Wolfbyte 5822"
@@ -188,6 +225,7 @@ class PreMatch : SKScene, MCSessionDelegate {
         didNotMoveBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "DidNotMoveBox")
         didNotMoveBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: didNotMoveLabelRect.midY + sceneWidth/200)
         didNotMoveBox.node.zPosition = 2
+        didNotMoveBox.setValue(aValue: didNotMoveValue)
         didNotMoveBox.adjustSize()
         
         let crossBaseLineRect = CGRect(x: sceneWidth/10, y: didNotMoveLabelRect.midY-didNotMoveLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
@@ -201,6 +239,7 @@ class PreMatch : SKScene, MCSessionDelegate {
         crossBaseLineBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "CrossBaseLineBox")
         crossBaseLineBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: crossBaseLineRect.midY + sceneWidth/200)
         crossBaseLineBox.node.zPosition = 2
+        crossBaseLineBox.setValue(aValue: crossBaseLineValue)
         crossBaseLineBox.adjustSize()
         
         let attemptGearLabelRect = CGRect(x: sceneWidth/10, y: crossBaseLineRect.midY-crossBaseLineRect.height, width: sceneWidth/10, height: sceneHeight/10)
@@ -214,6 +253,7 @@ class PreMatch : SKScene, MCSessionDelegate {
         attemptGearBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "AttemptGearBox")
         attemptGearBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: attemptGearLabelRect.midY + sceneWidth/200)
         attemptGearBox.node.zPosition = 2
+        attemptGearBox.setValue(aValue: attemptGearValue)
         attemptGearBox.adjustSize()
         
         let madeGearLabelRect = CGRect(x: attemptGearLabelRect.maxX + sceneWidth/20, y: attemptGearLabelRect.midY, width: sceneWidth/10, height: sceneHeight/10)
@@ -227,6 +267,7 @@ class PreMatch : SKScene, MCSessionDelegate {
         madeGearBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "MadeGearBox")
         madeGearBox.setPosition(x: madeGearLabelRect.minX + sceneWidth/15, y: madeGearLabelRect.midY - madeGearBox.node.frame.height)
         madeGearBox.node.zPosition = 2
+        madeGearBox.setValue(aValue: madeGearValue)
         madeGearBox.adjustSize()
         
         let attemptShotLabelRect = CGRect(x: didNotMoveLabelRect.maxX + sceneWidth/20, y: didNotMoveLabelRect.midY, width: sceneWidth/10, height: sceneHeight/10)
@@ -240,9 +281,76 @@ class PreMatch : SKScene, MCSessionDelegate {
         attemptShotBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "AttemptShotBox")
         attemptShotBox.setPosition(x: attemptShotLabelRect.minX + sceneWidth/15, y: attemptShotLabelRect.midY - attemptShotBox.node.frame.height)
         attemptShotBox.node.zPosition = 2
+        attemptShotBox.setValue(aValue: attemptShotValue)
         attemptShotBox.adjustSize()
     
-        let
+        let zoneLabelRect = CGRect(x: attemptShotLabelRect.maxX + sceneWidth/20, y: attemptShotLabelRect.midY, width: sceneWidth/20, height: sceneHeight/10)
+        zoneLabel.text = "Zone:"
+        zoneLabel.fontName = "Arial"
+        zoneLabel.fontColor = UIColor(netHex: 0xEECD86)
+        adjustLabelFontSizeToFitRect(labelNode: zoneLabel, rect: zoneLabelRect)
+        zoneLabel.position = CGPoint(x: zoneLabelRect.minX, y: zoneLabelRect.midY - zoneLabelRect.height)
+        zoneLabel.zPosition = 2
+        
+        let zone1Rect = CGRect(x: zoneLabelRect.midX + sceneWidth/45, y: attemptShotLabelRect.midY, width: sceneWidth/30, height: sceneHeight/10)
+        zone1Label.text = "1:"
+        zone1Label.fontName = "Arial"
+        zone1Label.fontColor = UIColor(netHex: 0xEECD86)
+        zone1Label.fontSize = attemptShotLabel.fontSize
+        zone1Label.position = CGPoint(x: zone1Rect.minX, y: zone1Rect.midY - zone1Rect.height)
+        zone1Label.zPosition = 2
+        
+        zone1Box = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "Zone1Box")
+        zone1Box.setPosition(x: zone1Rect.minX + sceneWidth/45, y: zone1Rect.midY - zone1Rect.height/2 - zone1Box.node.frame.height)
+        zone1Box.node.zPosition = 2
+        zone1Box.setValue(aValue: zone1Value)
+        zone1Box.adjustSize()
+        
+        let zone2Rect = CGRect(x: zone1Rect.midX + sceneWidth/35, y: attemptShotLabelRect.midY, width: sceneWidth/30, height: sceneHeight/10)
+        zone2Label.text = "2:"
+        zone2Label.fontName = "Arial"
+        zone2Label.fontColor = UIColor(netHex: 0xEECD86)
+        zone2Label.fontSize = zone1Label.fontSize
+        zone2Label.position = CGPoint(x: zone2Rect.minX, y: zone2Rect.midY - zone2Rect.height)
+        zone2Label.zPosition = 2
+        
+        zone2Box = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "Zone2Box")
+        zone2Box.setPosition(x: zone2Rect.minX + sceneWidth/45, y: zone2Rect.midY - zone2Rect.height/2 - zone2Box.node.frame.height)
+        zone2Box.node.zPosition = 2
+        zone2Box.setValue(aValue: zone2Value)
+        zone2Box.adjustSize()
+        
+        let zone3Rect = CGRect(x: zone2Rect.midX + sceneWidth/35, y: attemptShotLabelRect.midY, width: sceneWidth/30, height: sceneHeight/10)
+        zone3Label.text = "3:"
+        zone3Label.fontColor = UIColor(netHex: 0xEECD86)
+        zone3Label.fontName = "Arial"
+        zone3Label.fontSize = zone2Label.fontSize
+        zone3Label.position = CGPoint(x: zone3Rect.minX, y: zone3Rect.midY - zone3Rect.height)
+        zone3Label.zPosition = 2
+        
+        zone3Box = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "Zone3Box")
+        zone3Box.setPosition(x: zone3Rect.minX + sceneWidth/45, y: zone3Rect.midY - zone3Rect.height/2 - zone3Box.node.frame.height)
+        zone3Box.node.zPosition = 2
+        zone3Box.setValue(aValue: zone3Value)
+        zone3Box.adjustSize()
+        
+        let estimatedFuelMadeRect = CGRect(x: zoneLabelRect.midX, y: crossBaseLineRect.midY - sceneHeight/10, width: sceneWidth/7, height: sceneHeight/10)
+        estimatedFuelMadeLabel.text = "Estimated Fuel Made:"
+        estimatedFuelMadeLabel.fontColor = UIColor(netHex: 0xEECD86)
+        estimatedFuelMadeLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: estimatedFuelMadeLabel, rect: estimatedFuelMadeRect)
+        estimatedFuelMadeLabel.position = CGPoint(x: estimatedFuelMadeRect.minX, y: estimatedFuelMadeRect.midY)
+        estimatedFuelMadeLabel.zPosition = 2
+        
+        estimatedFuelMade = UITextField(frame: CGRect(x: view.center.x + zoneLabelRect.width/3, y: sceneHeight - (estimatedFuelMadeRect.maxY), width: zoneLabelRect.width * 2, height: zoneLabelRect.height/2))
+        estimatedFuelMade.placeholder = "#"
+        estimatedFuelMade.borderStyle = .roundedRect
+        estimatedFuelMade.backgroundColor = UIColor(netHex: 0xEECD86)
+        estimatedFuelMade.textAlignment = .center
+        estimatedFuelMade.textColor = enterMatchAlliance.textColor
+        estimatedFuelMade.text = "\(estimatedFuelValue)"
+        estimatedFuelMade.adjustsFontSizeToFitWidth = true
+        
         
         self.peerID = MCPeerID(displayName: UIDevice.current.name)
         self.session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: MCEncryptionPreference.none)
@@ -299,17 +407,6 @@ class PreMatch : SKScene, MCSessionDelegate {
                     UserDefaults.standard.set(tag, forKey: "tag")
                     UserDefaults.standard.synchronize()
                     
-                    completeDataString.append("\(allianceString), \(robotNumber), \(nameString)\n")
-                    
-                    let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
-                    do {
-                        try self.session.send(completeString!, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
-
-                    }
-                    catch {
-                        print("ERROR")
-                    }
-                    
                     self.removeAllChildren()
                     self.addChild(autonomousDiv)
                     self.addChild(teleopDiv)
@@ -328,10 +425,20 @@ class PreMatch : SKScene, MCSessionDelegate {
                     self.addChild(madeGearBox.node)
                     self.addChild(attemptShotLabel)
                     self.addChild(attemptShotBox.node)
+                    self.addChild(zoneLabel)
+                    self.addChild(zone1Label)
+                    self.addChild(zone1Box.node)
+                    self.addChild(zone2Label)
+                    self.addChild(zone2Box.node)
+                    self.addChild(zone3Label)
+                    self.addChild(zone3Box.node)
+                    self.addChild(estimatedFuelMadeLabel)
+                    view?.addSubview(estimatedFuelMade)
                 }
             }
             if name == "DidNotMoveBox" {
                 didNotMoveBox.changeValue()
+                
             }
             if name == "CrossBaseLineBox" {
                 crossBaseLineBox.changeValue()
@@ -341,6 +448,33 @@ class PreMatch : SKScene, MCSessionDelegate {
             }
             if name == "MadeGearBox" {
                 madeGearBox.changeValue()
+            }
+            if name == "AttemptShotBox" {
+                attemptShotBox.changeValue()
+            }
+            if name == "Zone1Box" {
+                zone1Box.changeValue()
+            }
+            if name == "Zone2Box" {
+                zone2Box.changeValue()
+            }
+            if name == "Zone3Box" {
+                zone3Box.changeValue()
+            }
+            if name == "Logo" {
+                estimatedFuelValue = Int(estimatedFuelMade.text!)!
+                
+                
+                completeDataString.append("\(allianceString), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue)\n")
+                
+                let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
+                do {
+                    try self.session.send(completeString!, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
+                    
+                }
+                catch {
+                    print("ERROR")
+                }
             }
         }
 
@@ -391,6 +525,16 @@ class PreMatch : SKScene, MCSessionDelegate {
             self.addChild(madeGearBox.node)
             self.addChild(attemptShotLabel)
             self.addChild(attemptShotBox.node)
+            self.addChild(zoneLabel)
+            self.addChild(zone1Label)
+            self.addChild(zone1Box.node)
+            self.addChild(zone2Label)
+            self.addChild(zone2Box.node)
+            self.addChild(zone3Label)
+            self.addChild(zone3Box.node)
+            self.addChild(estimatedFuelMadeLabel)
+            view?.addSubview(estimatedFuelMade)
+            
         }
     }
     
