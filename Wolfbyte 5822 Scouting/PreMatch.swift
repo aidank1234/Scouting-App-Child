@@ -29,7 +29,7 @@ class PreMatch : SKScene, MCSessionDelegate {
     var peerID: MCPeerID!
     let serviceType = "SCOUTING-APP"
     
-    var allianceString = ""
+    var allianceString : String!
     var robotNumber = ""
     var nameString = ""
     
@@ -61,8 +61,29 @@ class PreMatch : SKScene, MCSessionDelegate {
     var zone3Box = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
     var estimatedFuelMadeLabel = SKLabelNode()
     var estimatedFuelMade = UITextField()
-    var attemptHopperLabel = SKLabelNode()
-    var attemptHopperBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var madeHopperLabel = SKLabelNode()
+    var madeHopperBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var attemptLowLabel = SKLabelNode()
+    var attemptLowEstimation = UITextField()
+    
+    var zone1FuelLabel = SKLabelNode()
+    var zone1FuelAmount = UIStepper()
+    var zone1FuelAmountLabel = SKLabelNode()
+    var zone2FuelLabel = SKLabelNode()
+    var zone2FuelAmount = UIStepper()
+    var zone2FuelAmountLabel = SKLabelNode()
+    var zone3FuelLabel = SKLabelNode()
+    var zone3FuelAmount = UIStepper()
+    var zone3FuelAmountLabel = SKLabelNode()
+    var shotSpeedLabel = SKLabelNode()
+    var shotSpeed = UIStepper()
+    var shotSpeedAmountLabel = SKLabelNode()
+    var madeGearsLabel = SKLabelNode()
+    var madeGearsAmount = UIStepper()
+    var madeGearsAmountLabel = SKLabelNode()
+    var droppedGearsLabel = SKLabelNode()
+    var droppedGearsAmount = UIStepper()
+    var droppedGearsAmountLabel = SKLabelNode()
     
     var didNotMoveValue = 0
     var crossBaseLineValue = 0
@@ -73,7 +94,14 @@ class PreMatch : SKScene, MCSessionDelegate {
     var zone2Value = 0
     var zone3Value = 0
     var estimatedFuelValue = 0
-    
+    var madeHopperValue = 0
+    var estimatedLowGoalValue = 0
+    var zone1TeleopValue = 0
+    var zone2TeleopValue = 0
+    var zone3TeleopValue = 0
+    var madeGearsValue = 0
+    var missedGearsValue = 0
+    var shotSpeedValue = 0
     
     
     
@@ -110,6 +138,8 @@ class PreMatch : SKScene, MCSessionDelegate {
             defaults.set(zone2Value, forKey: "zone2")
             defaults.set(zone3Value, forKey: "zone3")
             defaults.set(estimatedFuelValue, forKey: "estimatedFuel")
+            defaults.set(madeHopperValue, forKey: "madeHopper")
+            defaults.set(estimatedLowGoalValue, forKey: "estimatedLowGoal")
             defaults.synchronize()
         }
         else {
@@ -123,6 +153,8 @@ class PreMatch : SKScene, MCSessionDelegate {
             zone2Value = defaults.integer(forKey: "zone2")
             zone3Value = defaults.integer(forKey: "zone3")
             estimatedFuelValue = defaults.integer(forKey: "estimatedFuel")
+            madeHopperValue = defaults.integer(forKey: "madeHopper")
+            estimatedLowGoalValue = defaults.integer(forKey: "estimatedLowGoal")
             
         }
         
@@ -213,6 +245,14 @@ class PreMatch : SKScene, MCSessionDelegate {
         adjustLabelFontSizeToFitRect(labelNode: autoLabel, rect: autoLabelRect)
         autoLabel.position = CGPoint(x: sceneWidth/10, y: sceneHeight - sceneHeight/20)
         autoLabel.zPosition = 2
+        
+        let teleopLabelRect = CGRect(x: sceneWidth/10, y: sceneHeight - sceneHeight/3 - sceneHeight/10, width: sceneWidth/10, height: sceneHeight/10)
+        teleopLabel.text = "Teleop"
+        teleopLabel.fontColor = enterTeamNumber.textColor
+        teleopLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: teleopLabel, rect: teleopLabelRect)
+        teleopLabel.position = CGPoint(x: teleopLabelRect.minX, y: teleopLabelRect.midY)
+        teleopLabel.zPosition = 2
         
         let didNotMoveLabelRect = CGRect(x: sceneWidth/10, y: autoLabelRect.midY - autoLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
         didNotMoveLabel.text = "Did Not Move:"
@@ -335,7 +375,7 @@ class PreMatch : SKScene, MCSessionDelegate {
         zone3Box.adjustSize()
         
         let estimatedFuelMadeRect = CGRect(x: zoneLabelRect.midX, y: crossBaseLineRect.midY - sceneHeight/10, width: sceneWidth/7, height: sceneHeight/10)
-        estimatedFuelMadeLabel.text = "Estimated Fuel Made:"
+        estimatedFuelMadeLabel.text = "Estimated Fuel Made (High):"
         estimatedFuelMadeLabel.fontColor = UIColor(netHex: 0xEECD86)
         estimatedFuelMadeLabel.fontName = "Arial"
         adjustLabelFontSizeToFitRect(labelNode: estimatedFuelMadeLabel, rect: estimatedFuelMadeRect)
@@ -351,6 +391,177 @@ class PreMatch : SKScene, MCSessionDelegate {
         estimatedFuelMade.text = "\(estimatedFuelValue)"
         estimatedFuelMade.adjustsFontSizeToFitWidth = true
         
+        let madeHopperRect = CGRect(x: sceneWidth/10, y: attemptGearLabelRect.midY - attemptGearLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        madeHopperLabel.text = "Made Hopper?:"
+        madeHopperLabel.fontColor = UIColor(netHex: 0xEECD86)
+        madeHopperLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: madeHopperLabel, rect: madeHopperRect)
+        madeHopperLabel.position = CGPoint(x: madeHopperRect.minX, y: madeHopperRect.midY)
+        madeHopperLabel.zPosition = 2
+        
+        madeHopperBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "MadeHopperBox")
+        madeHopperBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: madeHopperRect.midY + sceneWidth/200)
+        madeHopperBox.node.zPosition = 2
+        madeHopperBox.setValue(aValue: madeHopperValue)
+        madeHopperBox.adjustSize()
+        
+        let attemptLowLabelRect = CGRect(x: sceneWidth/10, y: madeHopperRect.midY - madeHopperRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        attemptLowLabel.text = "Estimated Fuel Low:"
+        attemptLowLabel.fontColor = UIColor(netHex: 0xEECD86)
+        attemptLowLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: attemptLowLabel, rect: attemptLowLabelRect)
+        attemptLowLabel.position = CGPoint(x: attemptLowLabelRect.minX, y: attemptLowLabelRect.midY)
+        attemptLowLabel.zPosition = 2
+            
+        attemptLowEstimation = UITextField(frame: CGRect(x: view.center.x - sceneWidth/3, y: view.center.y - sceneHeight/4.25, width: zoneLabelRect.width * 2, height: zoneLabelRect.height/2))
+        attemptLowEstimation.placeholder = "#"
+        attemptLowEstimation.borderStyle = .roundedRect
+        attemptLowEstimation.backgroundColor = UIColor(netHex: 0xEECD86)
+        attemptLowEstimation.textAlignment = .center
+        attemptLowEstimation.textColor = enterMatchAlliance.textColor
+        attemptLowEstimation.text = "\(estimatedLowGoalValue)"
+        attemptLowEstimation.adjustsFontSizeToFitWidth = true
+        
+        
+        let zone1FuelLabelRect = CGRect(x: sceneWidth/10, y: teleopLabelRect.midY - teleopLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        zone1FuelLabel.text = "Fuel Made Zone 1:"
+        zone1FuelLabel.fontColor = teleopLabel.fontColor
+        zone1FuelLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: zone1FuelLabel, rect: zone1FuelLabelRect)
+        zone1FuelLabel.position = CGPoint(x: zone1FuelLabelRect.minX, y: zone1FuelLabelRect.midY)
+        zone1FuelLabel.zPosition = 2
+        
+        zone1FuelAmount = UIStepper(frame: CGRect(x: attemptLowEstimation.frame.minX, y: sceneHeight/2.5, width: zoneLabelRect.width * 2, height: zoneLabelRect.height/2))
+        zone1FuelAmount.autorepeat = true
+        zone1FuelAmount.minimumValue = 0
+        zone1FuelAmount.stepValue = 1
+        zone1FuelAmount.value = 0
+        zone1FuelAmount.addTarget(self, action: #selector(zone1StepperChanged), for: .valueChanged)
+        
+        let zone1FuelAmountLabelRect = CGRect(x: zone1FuelAmount.frame.maxX + sceneWidth/30, y: zone1FuelAmount.frame.midY + zone1FuelAmount.frame.height * 2, width: sceneWidth/10, height: sceneWidth/10)
+        zone1FuelAmountLabel.text = "\(zone1TeleopValue)"
+        zone1FuelAmountLabel.fontColor = teleopLabel.fontColor
+        zone1FuelAmountLabel.fontName = "Arial"
+        zone1FuelAmountLabel.fontSize = teleopLabel.fontSize
+        zone1FuelAmountLabel.position = CGPoint(x: zone1FuelAmountLabelRect.minX, y: zone1FuelAmountLabelRect.midY)
+        zone1FuelAmountLabel.zPosition = 2
+        
+        let zone2FuelLabelRect = CGRect(x: zone1FuelAmountLabelRect.maxX + sceneWidth/30, y: zone1FuelLabelRect.minY, width: sceneWidth/10, height: sceneHeight/10)
+        zone2FuelLabel.text = "Fuel Made Zone 2:"
+        zone2FuelLabel.fontColor = teleopLabel.fontColor
+        zone2FuelLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: zone2FuelLabel, rect: zone2FuelLabelRect)
+        zone2FuelLabel.position = CGPoint(x: zone2FuelLabelRect.minX, y: zone2FuelLabelRect.midY)
+        zone2FuelLabel.zPosition = 2
+        
+        zone2FuelAmount = UIStepper(frame: CGRect(x: zone2FuelLabelRect.minX + sceneWidth/15, y: zone1FuelAmount.frame.minY, width: zone1FuelAmount.frame.width, height: zone1FuelAmount.frame.height))
+        zone2FuelAmount.autorepeat = true
+        zone2FuelAmount.minimumValue = 0
+        zone2FuelAmount.stepValue = 1
+        zone2FuelAmount.value = 0
+        zone2FuelAmount.addTarget(self, action: #selector(zone2StepperChanged), for: .valueChanged)
+        
+        let zone2FuelAmountLabelRect = CGRect(x: zone2FuelAmount.frame.maxX + sceneWidth/30, y: zone2FuelAmount.frame.midY + zone2FuelAmount.frame.height * 2, width: sceneWidth/10, height: sceneWidth/10)
+        zone2FuelAmountLabel.text = "\(zone2TeleopValue)"
+        zone2FuelAmountLabel.fontColor = teleopLabel.fontColor
+        zone2FuelAmountLabel.fontName = "Arial"
+        zone2FuelAmountLabel.fontSize = teleopLabel.fontSize
+        zone2FuelAmountLabel.position = CGPoint(x: zone2FuelAmountLabelRect.minX, y: zone2FuelAmountLabelRect.midY)
+        zone2FuelAmountLabel.zPosition = 2
+        
+        let zone3FuelLabelRect = CGRect(x: zone2FuelAmountLabelRect.maxX + sceneWidth/30, y: zone2FuelLabelRect.minY, width: sceneWidth/10, height: sceneHeight/10)
+        zone3FuelLabel.text = "Fuel Made Zone 3:"
+        zone3FuelLabel.fontColor = teleopLabel.fontColor
+        zone3FuelLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: zone3FuelLabel, rect: zone3FuelLabelRect)
+        zone3FuelLabel.position = CGPoint(x: zone3FuelLabelRect.minX, y: zone3FuelLabelRect.midY)
+        zone3FuelLabel.zPosition = 2
+        
+        zone3FuelAmount = UIStepper(frame: CGRect(x: zone3FuelLabelRect.minX + sceneWidth/15, y: zone2FuelAmount.frame.minY, width: zone2FuelAmount.frame.width, height: zone2FuelAmount.frame.height))
+        zone3FuelAmount.autorepeat = true
+        zone3FuelAmount.minimumValue = 0
+        zone3FuelAmount.stepValue = 1
+        zone3FuelAmount.value = 0
+        zone3FuelAmount.addTarget(self, action: #selector(zone3StepperChanged), for: .valueChanged)
+        
+        let zone3FuelAmountLabelRect = CGRect(x: zone3FuelAmount.frame.maxX + sceneWidth/30, y: zone2FuelAmount.frame.midY + zone2FuelAmount.frame.height * 2, width: sceneWidth/10, height: sceneWidth/10)
+        zone3FuelAmountLabel.text = "\(zone3TeleopValue)"
+        zone3FuelAmountLabel.fontColor = teleopLabel.fontColor
+        zone3FuelAmountLabel.fontName = "Arial"
+        zone3FuelAmountLabel.fontSize = teleopLabel.fontSize
+        zone3FuelAmountLabel.position = CGPoint(x: zone3FuelAmountLabelRect.minX, y: zone3FuelAmountLabelRect.midY)
+        zone3FuelAmountLabel.zPosition = 2
+        
+        let madeGearsLabelRect = CGRect(x: sceneWidth/10, y: zone1FuelLabelRect.midY - zone1FuelLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        madeGearsLabel.text = "Made Gears:"
+        madeGearsLabel.fontColor = teleopLabel.fontColor
+        madeGearsLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: madeGearsLabel, rect: madeGearsLabelRect)
+        madeGearsLabel.position = CGPoint(x: madeGearsLabelRect.minX, y: madeGearsLabelRect.midY)
+        madeGearsLabel.zPosition = 2
+        
+        madeGearsAmount = UIStepper(frame: CGRect(x: attemptLowEstimation.frame.minX, y: zone1FuelAmount.frame.midY + zone1FuelAmount.frame.height, width: zone1FuelAmount.frame.width, height: zone1FuelAmount.frame.height))
+        madeGearsAmount.autorepeat = true
+        madeGearsAmount.minimumValue = 0
+        madeGearsAmount.stepValue = 1
+        madeGearsAmount.value = 0
+        madeGearsAmount.addTarget(self, action: #selector(madeGearsChanged), for: .valueChanged)
+        
+        let madeGearsAmountLabelRect = CGRect(x: madeGearsAmount.frame.maxX + sceneWidth/30, y: madeGearsAmount.frame.minY, width: sceneWidth/10, height: sceneHeight/10)
+        madeGearsAmountLabel.text = "\(madeGearsValue)"
+        madeGearsAmountLabel.fontColor = teleopLabel.fontColor
+        madeGearsAmountLabel.fontName = "Arial"
+        madeGearsAmountLabel.fontSize = teleopLabel.fontSize
+        madeGearsAmountLabel.position = CGPoint(x: madeGearsAmountLabelRect.minX, y: madeGearsAmountLabelRect.midY)
+        madeGearsAmountLabel.zPosition = 2
+        
+        let missedGearsLabelRect = CGRect(x: madeGearsAmountLabelRect.maxX + sceneWidth/30, y: madeGearsLabelRect.minY, width: sceneWidth/10, height: sceneHeight/10)
+        droppedGearsLabel.text = "Dropped Gears:"
+        droppedGearsLabel.fontColor = teleopLabel.fontColor
+        droppedGearsLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: droppedGearsLabel, rect: missedGearsLabelRect)
+        droppedGearsLabel.position = CGPoint(x: missedGearsLabelRect.minX, y: missedGearsLabelRect.midY)
+        droppedGearsLabel.zPosition = 2
+        
+        droppedGearsAmount = UIStepper(frame: CGRect(x: missedGearsLabelRect.minX + sceneWidth/15, y: madeGearsAmount.frame.minY, width: madeGearsAmount.frame.width, height: madeGearsAmount.frame.height))
+        droppedGearsAmount.autorepeat = true
+        droppedGearsAmount.minimumValue = 0
+        droppedGearsAmount.stepValue = 1
+        droppedGearsAmount.value = 0
+        droppedGearsAmount.addTarget(self, action: #selector(missedGearsChanged), for: .valueChanged)
+        
+        let droppedGearsAmountLabelRect = CGRect(x: droppedGearsAmount.frame.maxX + sceneWidth/30, y: droppedGearsAmount.frame.minY, width: sceneWidth/10, height: sceneHeight/10)
+        droppedGearsAmountLabel.text = "\(missedGearsValue)"
+        droppedGearsAmountLabel.fontColor = teleopLabel.fontColor
+        droppedGearsAmountLabel.fontName = "Arial"
+        droppedGearsAmountLabel.fontSize = teleopLabel.fontSize
+        droppedGearsAmountLabel.position = CGPoint(x: droppedGearsAmountLabelRect.minX, y: droppedGearsAmountLabelRect.midY)
+        droppedGearsAmountLabel.zPosition = 2
+        
+        let shotSpeedLabelRect = CGRect(x: sceneWidth/10, y: missedGearsLabelRect.midY - missedGearsLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        shotSpeedLabel.text = "Shot Speed (1-5):"
+        shotSpeedLabel.fontColor = teleopLabel.fontColor
+        shotSpeedLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: shotSpeedLabel, rect: shotSpeedLabelRect)
+        shotSpeedLabel.position = CGPoint(x: shotSpeedLabelRect.minX, y: shotSpeedLabelRect.midY)
+        shotSpeedLabel.zPosition = 2
+        
+        shotSpeed = UIStepper(frame: CGRect(x: attemptLowEstimation.frame.minX, y: madeGearsAmount.frame.midY + madeGearsAmount.frame.height, width: madeGearsAmount.frame.width, height: madeGearsAmount.frame.height))
+        shotSpeed.autorepeat = true
+        shotSpeed.minimumValue = 0
+        shotSpeed.maximumValue = 5
+        shotSpeed.stepValue = 1
+        shotSpeed.value = 0
+        shotSpeed.addTarget(self, action: #selector(shotSpeedChanged), for: .valueChanged)
+        
+        let shotSpeedAmountLabelRect = CGRect(x: shotSpeed.frame.maxX + sceneWidth/30, y: shotSpeed.frame.minY - shotSpeed.frame.height * 3, width: sceneWidth/10, height: sceneHeight/10)
+        shotSpeedAmountLabel.text = "\(shotSpeedValue)"
+        shotSpeedAmountLabel.fontColor = teleopLabel.fontColor
+        shotSpeedAmountLabel.fontName = "Arial"
+        shotSpeedAmountLabel.fontSize = teleopLabel.fontSize
+        shotSpeedAmountLabel.position = CGPoint(x: shotSpeedAmountLabelRect.minX, y: shotSpeedAmountLabelRect.midY)
+        shotSpeedAmountLabel.zPosition = 2
+        print(shotSpeedAmountLabel.position)
         
         self.peerID = MCPeerID(displayName: UIDevice.current.name)
         self.session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: MCEncryptionPreference.none)
@@ -365,6 +576,30 @@ class PreMatch : SKScene, MCSessionDelegate {
             addChildren()
             childrenAdded = true
         }
+        zone1FuelAmountLabel.text = "\(zone1TeleopValue)"
+        zone2FuelAmountLabel.text = "\(zone2TeleopValue)"
+        zone3FuelAmountLabel.text = "\(zone3TeleopValue)"
+        madeGearsAmountLabel.text = "\(madeGearsValue)"
+        droppedGearsAmountLabel.text = "\(missedGearsValue)"
+        shotSpeedAmountLabel.text = "\(shotSpeedValue)"
+    }
+    func zone1StepperChanged(sender: UIStepper!) {
+        zone1TeleopValue = Int(sender.value)
+    }
+    func zone2StepperChanged(sender: UIStepper!) {
+        zone2TeleopValue = Int(sender.value)
+    }
+    func zone3StepperChanged(sender: UIStepper!) {
+        zone3TeleopValue = Int(sender.value)
+    }
+    func madeGearsChanged(sender: UIStepper!) {
+        madeGearsValue = Int(sender.value)
+    }
+    func missedGearsChanged(sender: UIStepper!) {
+        missedGearsValue = Int(sender.value)
+    }
+    func shotSpeedChanged(sender: UIStepper!) {
+        shotSpeedValue = Int(sender.value)
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
@@ -434,6 +669,29 @@ class PreMatch : SKScene, MCSessionDelegate {
                     self.addChild(zone3Box.node)
                     self.addChild(estimatedFuelMadeLabel)
                     view?.addSubview(estimatedFuelMade)
+                    self.addChild(madeHopperLabel)
+                    self.addChild(madeHopperBox.node)
+                    self.addChild(attemptLowLabel)
+                    view?.addSubview(attemptLowEstimation)
+                    self.addChild(teleopLabel)
+                    self.addChild(zone1FuelLabel)
+                    view?.addSubview(zone1FuelAmount)
+                    self.addChild(zone1FuelAmountLabel)
+                    self.addChild(zone2FuelLabel)
+                    self.addChild(zone2FuelAmountLabel)
+                    view?.addSubview(zone2FuelAmount)
+                    self.addChild(zone3FuelLabel)
+                    self.addChild(zone3FuelAmountLabel)
+                    view?.addSubview(zone3FuelAmount)
+                    self.addChild(madeGearsLabel)
+                    self.addChild(madeGearsAmountLabel)
+                    view?.addSubview(madeGearsAmount)
+                    self.addChild(droppedGearsLabel)
+                    self.addChild(droppedGearsAmountLabel)
+                    view?.addSubview(droppedGearsAmount)
+                    self.addChild(shotSpeedLabel)
+                    self.addChild(shotSpeedAmountLabel)
+                    view?.addSubview(shotSpeed)
                 }
             }
             if name == "DidNotMoveBox" {
@@ -461,11 +719,14 @@ class PreMatch : SKScene, MCSessionDelegate {
             if name == "Zone3Box" {
                 zone3Box.changeValue()
             }
+            if name == "MadeHopperBox" {
+                madeHopperBox.changeValue()
+            }
             if name == "Logo" {
                 estimatedFuelValue = Int(estimatedFuelMade.text!)!
+                estimatedLowGoalValue = Int(attemptLowEstimation.text!)!
                 
-                
-                completeDataString.append("\(allianceString), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue)\n")
+                completeDataString.append("\(allianceString!), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue), \(madeHopperBox.value!), \(estimatedLowGoalValue), \(zone1TeleopValue), \(zone2TeleopValue), \(zone3TeleopValue), \(madeGearsValue), \(missedGearsValue), \(shotSpeedValue)\n")
                 
                 let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
                 do {
@@ -534,7 +795,29 @@ class PreMatch : SKScene, MCSessionDelegate {
             self.addChild(zone3Box.node)
             self.addChild(estimatedFuelMadeLabel)
             view?.addSubview(estimatedFuelMade)
-            
+            self.addChild(madeHopperLabel)
+            self.addChild(madeHopperBox.node)
+            self.addChild(attemptLowLabel)
+            view?.addSubview(attemptLowEstimation)
+            self.addChild(teleopLabel)
+            self.addChild(zone1FuelLabel)
+            view?.addSubview(zone1FuelAmount)
+            self.addChild(zone1FuelAmountLabel)
+            self.addChild(zone2FuelLabel)
+            self.addChild(zone2FuelAmountLabel)
+            view?.addSubview(zone2FuelAmount)
+            self.addChild(zone3FuelLabel)
+            self.addChild(zone3FuelAmountLabel)
+            view?.addSubview(zone3FuelAmount)
+            self.addChild(madeGearsLabel)
+            self.addChild(madeGearsAmountLabel)
+            view?.addSubview(madeGearsAmount)
+            self.addChild(droppedGearsLabel)
+            self.addChild(droppedGearsAmountLabel)
+            view?.addSubview(droppedGearsAmount)
+            self.addChild(shotSpeedLabel)
+            self.addChild(shotSpeedAmountLabel)
+            view?.addSubview(shotSpeed)
         }
     }
     
@@ -575,31 +858,6 @@ class PreMatch : SKScene, MCSessionDelegate {
         if state == .connected {
             connected = true
         }
-            /*
-        else if state == .connecting || state == .notConnected {
-            if childrenAdded == true {
-                if tag == 0 {
-                    enterMatchAlliance.removeFromSuperview()
-                    themedButton.button.removeFromParent()
-                    themedButton.label.removeFromParent()
-                    showActivityIndicatory(uiView: self.view!)
-                }
-                else if tag == 2 {
-                    enterTeamNumber.removeFromSuperview()
-                    themedButton.button.removeFromParent()
-                    themedButton.label.removeFromParent()
-                    showActivityIndicatory(uiView: self.view!)
-                }
-                else if tag == 3 {
-                    enterTeamNumber.removeFromSuperview()
-                    themedButton.button.removeFromParent()
-                    themedButton.label.removeFromParent()
-                    showActivityIndicatory(uiView: self.view!)
-                }
-                childrenAdded = false
-            }
-        }
- */
     }
     func session(_ session: MCSession, didReceive data: Data,
                  fromPeer peerID: MCPeerID)  {
