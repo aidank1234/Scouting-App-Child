@@ -20,6 +20,7 @@
 		5F0A62B21E33C87D00F183E3 /* PreMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0A62B11E33C87D00F183E3 /* PreMatch.swift */; };
 		5F0A62B61E33D17700F183E3 /* ThemedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0A62B51E33D17700F183E3 /* ThemedButton.swift */; };
 		5F8B4E881E3D00AD00654BCE /* CheckBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8B4E871E3D00AD00654BCE /* CheckBox.swift */; };
+		5F9B3FD21E56651A009DB334 /* Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9B3FD11E56651A009DB334 /* Alerts.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 		5F0A62B11E33C87D00F183E3 /* PreMatch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreMatch.swift; sourceTree = "<group>"; };
 		5F0A62B51E33D17700F183E3 /* ThemedButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThemedButton.swift; sourceTree = "<group>"; };
 		5F8B4E871E3D00AD00654BCE /* CheckBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckBox.swift; sourceTree = "<group>"; };
+		5F9B3FD11E56651A009DB334 /* Alerts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alerts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 				5F0A627F1E33C33400F183E3 /* GameScene.sks */,
 				5F0A62811E33C33400F183E3 /* Actions.sks */,
 				5F0A62B11E33C87D00F183E3 /* PreMatch.swift */,
+				5F9B3FD11E56651A009DB334 /* Alerts.swift */,
 				5F8B4E871E3D00AD00654BCE /* CheckBox.swift */,
 				5F0A62B51E33D17700F183E3 /* ThemedButton.swift */,
 				5F0A62831E33C33400F183E3 /* GameScene.swift */,
@@ -287,6 +290,7 @@
 				5F8B4E881E3D00AD00654BCE /* CheckBox.swift in Sources */,
 				5F0A62861E33C33400F183E3 /* GameViewController.swift in Sources */,
 				5F0A62B61E33D17700F183E3 /* ThemedButton.swift in Sources */,
+				5F9B3FD21E56651A009DB334 /* Alerts.swift in Sources */,
 				5F0A627E1E33C33400F183E3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

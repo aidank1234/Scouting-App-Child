@@ -10,8 +10,7 @@ import Foundation
 import SpriteKit
 import MultipeerConnectivity
 
-class PreMatch : SKScene, MCSessionDelegate {
-    
+class PreMatch : SKScene, MCSessionDelegate, Alerts {
     var connected = false
     var childrenAdded = false
     var titleLabel = SKLabelNode()
@@ -103,7 +102,8 @@ class PreMatch : SKScene, MCSessionDelegate {
     var missedGearsValue = 0
     var shotSpeedValue = 0
     
-    
+    var nextButton = ThemedButton()
+    var previousButton = ThemedButton()
     
     var actInd = UIActivityIndicatorView()
     
@@ -140,6 +140,12 @@ class PreMatch : SKScene, MCSessionDelegate {
             defaults.set(estimatedFuelValue, forKey: "estimatedFuel")
             defaults.set(madeHopperValue, forKey: "madeHopper")
             defaults.set(estimatedLowGoalValue, forKey: "estimatedLowGoal")
+            defaults.set(zone1TeleopValue, forKey: "zone1Teleop")
+            defaults.set(zone2TeleopValue, forKey: "zone2Teleop")
+            defaults.set(zone3TeleopValue, forKey: "zone3Teleop")
+            defaults.set(madeGearsValue, forKey: "madeGearsValue")
+            defaults.set(missedGearsValue, forKey: "missedGearsValue")
+            defaults.set(shotSpeedValue, forKey: "shotSpeedValue")
             defaults.synchronize()
         }
         else {
@@ -155,6 +161,12 @@ class PreMatch : SKScene, MCSessionDelegate {
             estimatedFuelValue = defaults.integer(forKey: "estimatedFuel")
             madeHopperValue = defaults.integer(forKey: "madeHopper")
             estimatedLowGoalValue = defaults.integer(forKey: "estimatedLowGoal")
+            zone1TeleopValue = defaults.integer(forKey: "zone1Teleop")
+            zone2TeleopValue = defaults.integer(forKey: "zone2Teleop")
+            zone3TeleopValue = defaults.integer(forKey: "zone3Teleop")
+            missedGearsValue = defaults.integer(forKey: "missedGearsValue")
+            madeGearsValue = defaults.integer(forKey: "madeGearsValue")
+            shotSpeedValue = defaults.integer(forKey: "shotSpeedValue")
             
         }
         
@@ -563,6 +575,21 @@ class PreMatch : SKScene, MCSessionDelegate {
         shotSpeedAmountLabel.zPosition = 2
         print(shotSpeedAmountLabel.position)
         
+        nextButton = ThemedButton(size: CGSize(width: sceneWidth/10, height: sceneHeight/10), x: sceneWidth - sceneWidth/10, y: sceneHeight/10, name: "Finish")
+        nextButton.button.fillColor = teleopLabel.fontColor!
+        nextButton.button.strokeColor = nextButton.button.fillColor
+        nextButton.label.fontColor = autoLabel.fontColor
+        nextButton.button.zPosition = 2
+        nextButton.label.zPosition = 2
+        
+        previousButton = ThemedButton(size: CGSize(width: sceneWidth/10, height: sceneHeight/10), x: sceneWidth/10, y: sceneHeight/10, name: "Previous")
+        previousButton.button.fillColor = teleopLabel.fontColor!
+        previousButton.button.strokeColor = previousButton.button.fillColor
+        previousButton.label.fontColor = autoLabel.fontColor
+        previousButton.button.zPosition = 2
+        previousButton.label.zPosition = 2
+        
+        
         self.peerID = MCPeerID(displayName: UIDevice.current.name)
         self.session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: MCEncryptionPreference.none)
         self.session.delegate = self
@@ -692,6 +719,10 @@ class PreMatch : SKScene, MCSessionDelegate {
                     self.addChild(shotSpeedLabel)
                     self.addChild(shotSpeedAmountLabel)
                     view?.addSubview(shotSpeed)
+                    self.addChild(nextButton.button)
+                    self.addChild(nextButton.label)
+                    self.addChild(previousButton.button)
+                    self.addChild(previousButton.label)
                 }
             }
             if name == "DidNotMoveBox" {
@@ -722,19 +753,83 @@ class PreMatch : SKScene, MCSessionDelegate {
             if name == "MadeHopperBox" {
                 madeHopperBox.changeValue()
             }
-            if name == "Logo" {
-                estimatedFuelValue = Int(estimatedFuelMade.text!)!
-                estimatedLowGoalValue = Int(attemptLowEstimation.text!)!
-                
-                completeDataString.append("\(allianceString!), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue), \(madeHopperBox.value!), \(estimatedLowGoalValue), \(zone1TeleopValue), \(zone2TeleopValue), \(zone3TeleopValue), \(madeGearsValue), \(missedGearsValue), \(shotSpeedValue)\n")
-                
-                let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
-                do {
-                    try self.session.send(completeString!, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
+            if name == "Finish" {
+                if tag == 4 {
+                    estimatedFuelValue = Int(estimatedFuelMade.text!)!
+                    estimatedLowGoalValue = Int(attemptLowEstimation.text!)!
                     
+                    completeDataString.append("\(allianceString!), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue), \(madeHopperBox.value!), \(estimatedLowGoalValue), \(zone1TeleopValue), \(zone2TeleopValue), \(zone3TeleopValue), \(madeGearsValue), \(missedGearsValue), \(shotSpeedValue)\n")
+                    
+                    let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
+                    do {
+                        try self.session.send(completeString!, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
+                        
+                        showAlert(title: "Complete", message: "The data has been sent! ;) #Robots")
+                        tag = 1
+                        self.removeAllChildren()
+                        estimatedFuelMade.removeFromSuperview()
+                        attemptLowEstimation.removeFromSuperview()
+                        zone1FuelAmount.removeFromSuperview()
+                        zone2FuelAmount.removeFromSuperview()
+                        zone3FuelAmount.removeFromSuperview()
+                        madeGearsAmount.removeFromSuperview()
+                        droppedGearsAmount.removeFromSuperview()
+                        shotSpeed.removeFromSuperview()
+                        
+                        titleLabel.text = "Pre Match Data"
+                        self.addChild(titleLabel)
+                        enterMatchAlliance.text = ""
+                        enterTeamNumber.text = ""
+                        enterYourName.text = ""
+                        view?.addSubview(enterMatchAlliance)
+                        self.addChild(themedButton.button)
+                        self.addChild(themedButton.label)
+
+                    }
+                    catch {
+                        print("ERROR")
+                        
+                        showAlert(title: "Failed", message: "The data failed to send...please tell someone")
+ 
+                    }
+
+                    
+                    /*
+                    tag = 5
+                    removeAllChildren()
+                    titleLabel.text = "Finish"
+                    self.addChild(titleLabel)
+                    estimatedFuelMade.removeFromSuperview()
+                    attemptLowEstimation.removeFromSuperview()
+                    zone1FuelAmount.removeFromSuperview()
+                    zone2FuelAmount.removeFromSuperview()
+                    zone3FuelAmount.removeFromSuperview()
+                    madeGearsAmount.removeFromSuperview()
+                    droppedGearsAmount.removeFromSuperview()
+                    shotSpeed.removeFromSuperview()
+                    enterTeamNumber.placeholder = "Please enter any comments"
+                    view?.addSubview(enterTeamNumber)
+                    */
                 }
-                catch {
-                    print("ERROR")
+            }
+            if name == "Previous" {
+                if tag == 4 {
+                    tag = 1
+                    removeAllChildren()
+                    estimatedFuelMade.removeFromSuperview()
+                    attemptLowEstimation.removeFromSuperview()
+                    zone1FuelAmount.removeFromSuperview()
+                    zone2FuelAmount.removeFromSuperview()
+                    zone3FuelAmount.removeFromSuperview()
+                    madeGearsAmount.removeFromSuperview()
+                    droppedGearsAmount.removeFromSuperview()
+                    shotSpeed.removeFromSuperview()
+                    
+                    titleLabel.text = "Pre Match Data"
+                    self.addChild(titleLabel)
+                    view?.addSubview(enterMatchAlliance)
+                    self.addChild(themedButton.button)
+                    self.addChild(themedButton.label)
                 }
             }
         }
@@ -764,11 +859,23 @@ class PreMatch : SKScene, MCSessionDelegate {
             let defaults = UserDefaults.standard
             let loadedString = defaults.string(forKey: "RobotNumber")
             robotNumber = loadedString!
+            let loadedString2 = defaults.string(forKey: "AllianceString")
+            allianceString = loadedString2!
             view?.addSubview(enterYourName)
             self.addChild(themedButton.button)
             self.addChild(themedButton.label)
         }
         else if tag == 4 {
+            let defaults = UserDefaults.standard
+            let loadedString = defaults.string(forKey: "RobotNumber")
+            robotNumber = loadedString!
+            enterTeamNumber.text = loadedString!
+            let loadedString2 = defaults.string(forKey: "AllianceString")
+            allianceString = loadedString2!
+            enterMatchAlliance.text = loadedString2!
+            let loadedString3 = defaults.string(forKey: "NameString")
+            nameString = loadedString3!
+            enterYourName.text = loadedString3!
             self.addChild(autonomousDiv)
             self.addChild(teleopDiv)
             self.addChild(logo)
@@ -818,6 +925,10 @@ class PreMatch : SKScene, MCSessionDelegate {
             self.addChild(shotSpeedLabel)
             self.addChild(shotSpeedAmountLabel)
             view?.addSubview(shotSpeed)
+            self.addChild(nextButton.button)
+            self.addChild(nextButton.label)
+            self.addChild(previousButton.button)
+            self.addChild(previousButton.label)
         }
     }
     
