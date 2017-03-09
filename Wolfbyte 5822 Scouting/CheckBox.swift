@@ -39,32 +39,47 @@ class CheckBox {
         if value == 0 {
             node.texture = checkedTexture
             if name == "DidNotMoveBox" {
-                defaults.set(5, forKey: "didNotMove")
+                defaults.set(1, forKey: "didNotMove")
             }
             else if name == "CrossBaseLineBox" {
-                defaults.set(5, forKey: "crossBaseLine")
+                defaults.set(1, forKey: "crossBaseLine")
             }
             else if name == "AttemptGearBox" {
-                defaults.set(5, forKey: "attemptGear")
+                defaults.set(1, forKey: "attemptGear")
             }
             else if name == "MadeGearBox" {
-                defaults.set(5, forKey: "madeGear")
+                defaults.set(1, forKey: "madeGear")
             }
             else if name == "AttemptShotBox" {
-                defaults.set(5, forKey: "attemptShot")
+                defaults.set(1, forKey: "attemptShot")
             }
             else if name == "Zone1Box" {
-                defaults.set(5, forKey: "zone1")
+                defaults.set(1, forKey: "zone1")
             }
             else if name == "Zone2Box" {
-                defaults.set(5, forKey: "zone2")
+                defaults.set(1, forKey: "zone2")
             }
             else if name == "Zone3Box" {
-                defaults.set(5, forKey: "zone3")
+                defaults.set(1, forKey: "zone3")
             }
-            value = 5
+            else if name == "AttemptedClimbBox" {
+                defaults.set(1, forKey: "attemptedClimb")
+            }
+            else if name == "CanClimbBox" {
+                defaults.set(1, forKey: "canClimb")
+            }
+            else if name == "ClimbedNoTouchPadBox" {
+                defaults.set(1, forKey: "climbedNoTouchPad")
+            }
+            else if name == "GearFromFloorBox" {
+                defaults.set(1, forKey: "gearFromFloor")
+            }
+            else if name == "FuelFromFloorBox" {
+                defaults.set(1, forKey: "fuelFromFloor")
+            }
+            value = 1
         }
-        else if value == 5 {
+        else if value == 1 {
             node.texture = uncheckedTexture
             if name == "DidNotMoveBox" {
                 defaults.set(0, forKey: "didNotMove")
@@ -90,6 +105,21 @@ class CheckBox {
             else if name == "Zone3Box" {
                 defaults.set(0, forKey: "zone3")
             }
+            else if name == "AttemptedClimbBox" {
+                defaults.set(0, forKey: "attemptedClimb")
+            }
+            else if name == "CanClimbBox" {
+                defaults.set(0, forKey: "canClimb")
+            }
+            else if name == "ClimbedNoTouchPadBox" {
+                defaults.set(0, forKey: "climbedNoTouchPad")
+            }
+            else if name == "GearsFromFloorBox" {
+                defaults.set(0, forKey: "gearFromFloor")
+            }
+            else if name == "FuelFromFloorBox" {
+                defaults.set(0, forKey: "fuelFromFloor")
+            }
             value = 0
         }
         defaults.synchronize()
@@ -99,8 +129,8 @@ class CheckBox {
             value = 0
             node.texture = uncheckedTexture
         }
-        else if aValue == 5 {
-            value = 5
+        else if aValue == 1 {
+            value = 1
             node.texture = checkedTexture
         }
         else {

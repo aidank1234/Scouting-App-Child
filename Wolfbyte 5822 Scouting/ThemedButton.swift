@@ -69,6 +69,19 @@ class ThemedButton{
         button.strokeColor = UIColor(netHex: 0xEECD86)
         label.fontColor = UIColor(netHex: 0x7A3E48)
     }
+    func reverseColors() -> Void {
+        if button.fillColor == UIColor(netHex: 0xEECD86)
+        {
+            button.fillColor = UIColor(netHex: 0x7A3E48)
+            button.strokeColor = UIColor(netHex: 0x7A3E48)
+            label.fontColor = UIColor(netHex: 0xEECD86)
+        }
+        else {
+            button.fillColor = UIColor(netHex: 0xEECD86)
+            button.strokeColor = UIColor(netHex: 0xEECD86)
+            label.fontColor = UIColor(netHex: 0x7A3E48)
+        }
+    }
     func isTapped() -> Bool {
         var returnValue = false
         if tapped == true {

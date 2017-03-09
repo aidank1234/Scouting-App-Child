@@ -17,6 +17,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     var enterMatchAlliance = UITextField()
     var enterTeamNumber = UITextField()
     var enterYourName = UITextField()
+    var enterComments = UITextField()
     var tag = 0
     var completeDataString = NSMutableString()
     var themedButton = ThemedButton()
@@ -28,9 +29,10 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     var peerID: MCPeerID!
     let serviceType = "SCOUTING-APP"
     
-    var allianceString : String!
+    var allianceString = ""
     var robotNumber = ""
     var nameString = ""
+    var commentString = ""
     
     
     var autonomousDiv = SKShapeNode()
@@ -83,6 +85,29 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     var droppedGearsLabel = SKLabelNode()
     var droppedGearsAmount = UIStepper()
     var droppedGearsAmountLabel = SKLabelNode()
+    var gearTimeLabel = SKLabelNode()
+    var gearTime = UIStepper()
+    var gearTimeAmountLabel = SKLabelNode()
+    var attemptedClimbLabel = SKLabelNode()
+    var attemptedClimbBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var canClimbLabel = SKLabelNode()
+    var canClimbBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var climbedNoTouchPadLabel = SKLabelNode()
+    var climbedNoTouchPadBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var gearsFromFloorLabel = SKLabelNode()
+    var gearsFromFloorBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var fuelFromFloorLabel = SKLabelNode()
+    var fuelFromFloorBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    
+    var robotSpeedLabel = SKLabelNode()
+    var robotSpeed = UIStepper()
+    var robotSpeedAmount = SKLabelNode()
+    var shotAccuracyLabel = SKLabelNode()
+    var shotAccuracy = UIStepper()
+    var shotAccuracyAmount = SKLabelNode()
+    var humanPlayerSkillLabel = SKLabelNode()
+    var humanPlayerSkill = UIStepper()
+    var humanPlayerSkillAmount = SKLabelNode()
     
     var didNotMoveValue = 0
     var crossBaseLineValue = 0
@@ -100,10 +125,20 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     var zone3TeleopValue = 0
     var madeGearsValue = 0
     var missedGearsValue = 0
+    var gearTimeValue = 0
     var shotSpeedValue = 0
+    var attemptedClimbValue = 0
+    var canClimbValue = 0
+    var climbedNoTouchPadValue = 0
+    var robotSpeedValue = 0
+    var gearFromFloorValue = 0
+    var fuelFromFloorValue = 0
+    var shotAccuracyValue = 0
+    var humanPlayerSkillValue = 0
     
     var nextButton = ThemedButton()
     var previousButton = ThemedButton()
+    var finishButton = ThemedButton()
     
     var actInd = UIActivityIndicatorView()
     
@@ -145,7 +180,16 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
             defaults.set(zone3TeleopValue, forKey: "zone3Teleop")
             defaults.set(madeGearsValue, forKey: "madeGearsValue")
             defaults.set(missedGearsValue, forKey: "missedGearsValue")
+            defaults.set(gearTimeValue, forKey: "gearTimeValue")
             defaults.set(shotSpeedValue, forKey: "shotSpeedValue")
+            defaults.set(attemptedClimbValue, forKey: "attemptedClimb")
+            defaults.set(canClimbValue, forKey: "canClimb")
+            defaults.set(climbedNoTouchPadValue, forKey: "climbedNoTouchPad")
+            defaults.set(robotSpeedValue, forKey: "robotSpeed")
+            defaults.set(gearFromFloorValue, forKey: "gearFromFloor")
+            defaults.set(fuelFromFloorValue, forKey: "fuelFromFloor")
+            defaults.set(shotAccuracyValue, forKey: "shotAccuracy")
+            defaults.set(humanPlayerSkillValue, forKey: "humanPlayerSkill")
             defaults.synchronize()
         }
         else {
@@ -166,7 +210,16 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
             zone3TeleopValue = defaults.integer(forKey: "zone3Teleop")
             missedGearsValue = defaults.integer(forKey: "missedGearsValue")
             madeGearsValue = defaults.integer(forKey: "madeGearsValue")
+            gearTimeValue = defaults.integer(forKey: "gearTimeValue")
             shotSpeedValue = defaults.integer(forKey: "shotSpeedValue")
+            attemptedClimbValue = defaults.integer(forKey: "attemptedClimb")
+            canClimbValue = defaults.integer(forKey: "canClimb")
+            climbedNoTouchPadValue = defaults.integer(forKey: "climbedNoTouchPad")
+            robotSpeedValue = defaults.integer(forKey: "robotSpeed")
+            gearFromFloorValue = defaults.integer(forKey: "gearFromFloor")
+            fuelFromFloorValue = defaults.integer(forKey: "fuelFromFloor")
+            shotAccuracyValue = defaults.integer(forKey: "shotAccuracy")
+            humanPlayerSkillValue = defaults.integer(forKey: "humanPlayerSkill")
             
         }
         
@@ -183,7 +236,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         showActivityIndicatory(uiView: self.view!)
         
         enterMatchAlliance = UITextField(frame: CGRect(x: view.center.x - titleLabelRect.width, y: titleLabelRect.midY - (sceneHeight/1.5), width: titleLabelRect.width * 2, height: titleLabelRect.height/2))
-        enterMatchAlliance.placeholder = "Enter Match Alliance"
+        enterMatchAlliance.placeholder = "Enter Red or Blue"
         enterMatchAlliance.borderStyle = .roundedRect
         enterMatchAlliance.backgroundColor = UIColor(netHex: 0xEECD86)
         enterMatchAlliance.textAlignment = .center
@@ -205,6 +258,15 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         enterYourName.textAlignment = .center
         enterYourName.textColor = enterMatchAlliance.textColor
         enterYourName.adjustsFontSizeToFitWidth = true
+        
+        enterComments = UITextField(frame: enterMatchAlliance.frame)
+        enterComments.placeholder = "Enter any Comments"
+        enterComments.borderStyle = .roundedRect
+        enterComments.backgroundColor = enterMatchAlliance.backgroundColor
+        enterComments.textAlignment = .center
+        enterComments.textColor = enterMatchAlliance.textColor
+        enterComments.adjustsFontSizeToFitWidth = true
+        
         
         themedButton = ThemedButton(size: titleLabelRect.size, x: titleLabel.position.x, y: sceneHeight/6, name: "Next")
         
@@ -253,7 +315,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         let autoLabelRect = CGRect(x: sceneWidth/10, y: sceneHeight - sceneHeight/10, width: sceneWidth/10, height: sceneHeight/10)
         autoLabel.text = "Autonomous"
         autoLabel.fontColor = UIColor(netHex: 0xEECD86)
-        autoLabel.fontName = "Arial-Bold"
+        autoLabel.fontName = "Arial"
         adjustLabelFontSizeToFitRect(labelNode: autoLabel, rect: autoLabelRect)
         autoLabel.position = CGPoint(x: sceneWidth/10, y: sceneHeight - sceneHeight/20)
         autoLabel.zPosition = 2
@@ -295,7 +357,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         crossBaseLineBox.adjustSize()
         
         let attemptGearLabelRect = CGRect(x: sceneWidth/10, y: crossBaseLineRect.midY-crossBaseLineRect.height, width: sceneWidth/10, height: sceneHeight/10)
-        attemptGearLabel.text = "Attempted Gear?:"
+        attemptGearLabel.text = "Attempted Gear:"
         attemptGearLabel.fontName = "Arial"
         attemptGearLabel.fontColor = UIColor(netHex: 0xEECD86)
         adjustLabelFontSizeToFitRect(labelNode: attemptGearLabel, rect: attemptGearLabelRect)
@@ -309,7 +371,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         attemptGearBox.adjustSize()
         
         let madeGearLabelRect = CGRect(x: attemptGearLabelRect.maxX + sceneWidth/20, y: attemptGearLabelRect.midY, width: sceneWidth/10, height: sceneHeight/10)
-        madeGearLabel.text = "Made Gear?:"
+        madeGearLabel.text = "Made Gear:"
         madeGearLabel.fontName = "Arial"
         madeGearLabel.fontColor = UIColor(netHex: 0xEECD86)
         adjustLabelFontSizeToFitRect(labelNode: madeGearLabel, rect: madeGearLabelRect)
@@ -323,7 +385,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         madeGearBox.adjustSize()
         
         let attemptShotLabelRect = CGRect(x: didNotMoveLabelRect.maxX + sceneWidth/20, y: didNotMoveLabelRect.midY, width: sceneWidth/10, height: sceneHeight/10)
-        attemptShotLabel.text = "Attempt Shot?:"
+        attemptShotLabel.text = "Attempt Shot:"
         attemptShotLabel.fontName = "Arial"
         attemptShotLabel.fontColor = UIColor(netHex: 0xEECD86)
         adjustLabelFontSizeToFitRect(labelNode: attemptShotLabel, rect: attemptShotLabelRect)
@@ -404,7 +466,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         estimatedFuelMade.adjustsFontSizeToFitWidth = true
         
         let madeHopperRect = CGRect(x: sceneWidth/10, y: attemptGearLabelRect.midY - attemptGearLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
-        madeHopperLabel.text = "Made Hopper?:"
+        madeHopperLabel.text = "Made Hopper:"
         madeHopperLabel.fontColor = UIColor(netHex: 0xEECD86)
         madeHopperLabel.fontName = "Arial"
         adjustLabelFontSizeToFitRect(labelNode: madeHopperLabel, rect: madeHopperRect)
@@ -550,6 +612,30 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         droppedGearsAmountLabel.position = CGPoint(x: droppedGearsAmountLabelRect.minX, y: droppedGearsAmountLabelRect.midY)
         droppedGearsAmountLabel.zPosition = 2
         
+        let gearTimeLabelRect = CGRect(x: droppedGearsAmountLabelRect.maxX + sceneWidth/30, y: madeGearsLabelRect.minY, width: sceneWidth/10, height: sceneHeight/10)
+        gearTimeLabel.text = "Time to Drop Gear (1-5):"
+        gearTimeLabel.fontColor = teleopLabel.fontColor
+        gearTimeLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: gearTimeLabel, rect: gearTimeLabelRect)
+        gearTimeLabel.position = CGPoint(x: gearTimeLabelRect.minX, y: gearTimeLabelRect.midY)
+        gearTimeLabel.zPosition = 2
+        
+        gearTime = UIStepper(frame: CGRect(x: gearTimeLabelRect.minX + sceneWidth/15, y: droppedGearsAmount.frame.minY, width: droppedGearsAmount.frame.width, height: droppedGearsAmount.frame.height))
+        gearTime.autorepeat = true
+        gearTime.minimumValue = 0
+        gearTime.maximumValue = 5
+        gearTime.stepValue = 1
+        gearTime.value = 0
+        gearTime.addTarget(self, action: #selector(gearTimeChanged), for: .valueChanged)
+        
+        let gearTimeAmountLabelRect = CGRect(x: gearTime.frame.maxX + sceneWidth/30, y: gearTime.frame.minY, width: sceneWidth/10, height: sceneHeight/10)
+        gearTimeAmountLabel.text = "\(gearTimeValue)"
+        gearTimeAmountLabel.fontColor = teleopLabel.fontColor
+        gearTimeAmountLabel.fontName = "Arial"
+        gearTimeAmountLabel.fontSize = teleopLabel.fontSize
+        gearTimeAmountLabel.position = CGPoint(x: gearTimeAmountLabelRect.minX, y: gearTimeAmountLabelRect.midY)
+        gearTimeAmountLabel.zPosition = 2
+        
         let shotSpeedLabelRect = CGRect(x: sceneWidth/10, y: missedGearsLabelRect.midY - missedGearsLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
         shotSpeedLabel.text = "Shot Speed (1-5):"
         shotSpeedLabel.fontColor = teleopLabel.fontColor
@@ -575,7 +661,149 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         shotSpeedAmountLabel.zPosition = 2
         print(shotSpeedAmountLabel.position)
         
-        nextButton = ThemedButton(size: CGSize(width: sceneWidth/10, height: sceneHeight/10), x: sceneWidth - sceneWidth/10, y: sceneHeight/10, name: "Finish")
+        let attemptedClimbLabelRect = CGRect(x: sceneWidth/10, y: shotSpeedLabelRect.midY - shotSpeedLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        attemptedClimbLabel.text = "Attempted Climb:"
+        attemptedClimbLabel.fontColor = teleopLabel.fontColor
+        attemptedClimbLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: attemptedClimbLabel, rect: attemptedClimbLabelRect)
+        attemptedClimbLabel.position = CGPoint(x: attemptedClimbLabelRect.minX, y: attemptedClimbLabelRect.midY)
+        attemptedClimbLabel.zPosition = 2
+        
+        attemptedClimbBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "AttemptedClimbBox")
+        attemptedClimbBox.setPosition(x: sceneWidth/10 + sceneWidth/15, y: attemptedClimbLabelRect.midY + sceneWidth/200)
+        attemptedClimbBox.node.zPosition = 2
+        attemptedClimbBox.setValue(aValue: attemptedClimbValue)
+        attemptedClimbBox.adjustSize()
+        
+        let canClimbLabelRect = CGRect(x: attemptedClimbLabelRect.maxX + sceneWidth/20, y: attemptedClimbLabelRect.midY, width: sceneWidth/10, height: sceneHeight/10)
+        canClimbLabel.text = "Successful Climb:"
+        canClimbLabel.fontColor = teleopLabel.fontColor
+        canClimbLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: canClimbLabel, rect: canClimbLabelRect)
+        canClimbLabel.position = CGPoint(x: canClimbLabelRect.minX, y: canClimbLabelRect.midY - canClimbLabelRect.height/2)
+        canClimbLabel.zPosition = 2
+        
+        canClimbBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "CanClimbBox")
+        canClimbBox.setPosition(x: canClimbLabelRect.minX + sceneWidth/15, y: attemptedClimbLabelRect.midY + sceneWidth/200)
+        canClimbBox.node.zPosition = 2
+        canClimbBox.setValue(aValue: canClimbValue)
+        canClimbBox.adjustSize()
+        
+        let climbedNoTouchPadLabelRect = CGRect(x: canClimbLabelRect.maxX + sceneWidth/20, y: attemptedClimbLabelRect.midY + sceneHeight/20, width: sceneWidth/10, height: sceneHeight/10)
+        climbedNoTouchPadLabel.text = "Gets Hopper Fuel:"
+        climbedNoTouchPadLabel.fontColor = teleopLabel.fontColor
+        climbedNoTouchPadLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: climbedNoTouchPadLabel, rect: climbedNoTouchPadLabelRect)
+        climbedNoTouchPadLabel.position = CGPoint(x: climbedNoTouchPadLabelRect.minX, y: climbedNoTouchPadLabelRect.midY - climbedNoTouchPadLabelRect.height/2)
+        climbedNoTouchPadLabel.zPosition = 2
+        
+        climbedNoTouchPadBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "ClimbedNoTouchPadBox")
+        climbedNoTouchPadBox.setPosition(x: climbedNoTouchPadLabelRect.minX + sceneWidth/15, y: climbedNoTouchPadLabelRect.minY + sceneWidth/200)
+        climbedNoTouchPadBox.setValue(aValue: climbedNoTouchPadValue)
+        climbedNoTouchPadBox.adjustSize()
+        climbedNoTouchPadBox.node.zPosition = 2
+        
+        let gearsFromFloorLabelRect = CGRect(x: sceneWidth/10, y: attemptedClimbLabelRect.midY - attemptedClimbLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        gearsFromFloorLabel.text = "Picks Gear off Floor:"
+        gearsFromFloorLabel.fontColor = teleopLabel.fontColor
+        gearsFromFloorLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: gearsFromFloorLabel, rect: gearsFromFloorLabelRect)
+        gearsFromFloorLabel.position = CGPoint(x: gearsFromFloorLabelRect.minX, y: gearsFromFloorLabelRect.midY)
+        gearsFromFloorLabel.zPosition = 2
+        
+        gearsFromFloorBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "GearsFromFloorBox")
+        gearsFromFloorBox.setPosition(x: gearsFromFloorLabelRect.minX + sceneWidth/15, y: gearsFromFloorLabelRect.midY + sceneWidth/200)
+        gearsFromFloorBox.adjustSize()
+        gearsFromFloorBox.setValue(aValue: gearFromFloorValue)
+        gearsFromFloorBox.node.zPosition = 2
+        
+        let fuelFromFloorLabelRect = CGRect(x: gearsFromFloorLabelRect.maxX + sceneWidth/20, y: gearsFromFloorLabelRect.minY, width: sceneWidth/10, height: sceneHeight/10)
+        fuelFromFloorLabel.text = "Picks Fuel off Floor:"
+        fuelFromFloorLabel.fontColor = teleopLabel.fontColor
+        fuelFromFloorLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: fuelFromFloorLabel, rect: fuelFromFloorLabelRect)
+        fuelFromFloorLabel.position = CGPoint(x: fuelFromFloorLabelRect.minX, y: fuelFromFloorLabelRect.midY)
+        fuelFromFloorLabel.zPosition = 2
+        
+        fuelFromFloorBox = CheckBox(sceneWidth: sceneWidth, sceneHeight: sceneHeight, name: "FuelFromFloorBox")
+        fuelFromFloorBox.setPosition(x: fuelFromFloorLabelRect.minX + sceneWidth/15, y: gearsFromFloorLabelRect.midY + sceneWidth/200)
+        fuelFromFloorBox.adjustSize()
+        fuelFromFloorBox.setValue(aValue: fuelFromFloorValue)
+        fuelFromFloorBox.node.zPosition = 2
+        
+        let robotSpeedLabelRect = CGRect(x: sceneWidth/10, y: sceneHeight/2, width: sceneWidth/5, height: sceneHeight/5)
+        robotSpeedLabel.text = "Robot Speed (1-5):"
+        robotSpeedLabel.fontColor = autoLabel.fontColor
+        robotSpeedLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: robotSpeedLabel, rect: robotSpeedLabelRect)
+        robotSpeedLabel.position = CGPoint(x: robotSpeedLabelRect.minX, y: robotSpeedLabelRect.midY)
+        robotSpeedLabel.zPosition = 2
+        
+        robotSpeed = UIStepper(frame: CGRect(x: robotSpeedLabelRect.minX + sceneWidth/7.5, y: view.center.y - (sceneHeight/5/1.6), width: sceneWidth/5, height: sceneHeight/5))
+        robotSpeed.autorepeat = true
+        robotSpeed.minimumValue = 0
+        robotSpeed.maximumValue = 5
+        robotSpeed.stepValue = 1
+        robotSpeed.value = 0
+        robotSpeed.addTarget(self, action: #selector(robotSpeedChanged), for: .valueChanged)
+        
+        let robotSpeedAmountLabelRect = CGRect(x: robotSpeed.frame.maxX + sceneWidth/15, y: sceneHeight/2, width: sceneWidth/5, height: sceneHeight/5)
+        robotSpeedAmount.text = "\(robotSpeedValue)"
+        robotSpeedAmount.fontColor = autoLabel.fontColor
+        robotSpeedAmount.fontName = "Arial"
+        robotSpeedAmount.fontSize = robotSpeedLabel.fontSize
+        robotSpeedAmount.position = CGPoint(x: robotSpeedAmountLabelRect.minX, y: robotSpeedAmountLabelRect.midY)
+        robotSpeedAmount.zPosition = 2
+        
+        let shotAccuracyLabelRect = CGRect(x: sceneWidth/10, y: robotSpeedLabelRect.midY - robotSpeedLabelRect.height, width: sceneWidth/5, height: sceneHeight/5)
+        shotAccuracyLabel.text = "Shot Accuracy (1-5):"
+        shotAccuracyLabel.fontColor = autoLabel.fontColor
+        shotAccuracyLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: shotAccuracyLabel, rect: shotAccuracyLabelRect)
+        shotAccuracyLabel.position = CGPoint(x: shotAccuracyLabelRect.minX, y: shotAccuracyLabelRect.midY)
+        shotAccuracyLabel.zPosition = 2
+        
+        shotAccuracy = UIStepper(frame: CGRect(x: shotAccuracyLabelRect.minX + sceneWidth/7.5, y: robotSpeed.frame.midX + robotSpeedLabelRect.height/2, width: sceneWidth/5, height: sceneHeight/5))
+        shotAccuracy.autorepeat = true
+        shotAccuracy.minimumValue = 0
+        shotAccuracy.maximumValue = 5
+        shotAccuracy.stepValue = 1
+        shotAccuracy.value = 0
+        shotAccuracy.addTarget(self, action: #selector(shotAccuracyChanged), for: .valueChanged)
+        
+        let shotAccuracyAmountLabelRect = CGRect(x: robotSpeedAmount.position.x, y: robotSpeedAmount.position.y - sceneHeight/5, width: sceneWidth/5, height: sceneHeight/5)
+        shotAccuracyAmount.text = "\(shotAccuracyValue)"
+        shotAccuracyAmount.fontColor = autoLabel.fontColor
+        shotAccuracyAmount.fontName = "Arial"
+        shotAccuracyAmount.fontSize = robotSpeedLabel.fontSize
+        shotAccuracyAmount.position = CGPoint(x: shotAccuracyAmountLabelRect.minX, y: shotAccuracyAmountLabelRect.midY)
+        shotAccuracyAmount.zPosition = 2
+        
+        let humanPlayerSkillLabelRect = CGRect(x: sceneWidth/10, y: shotAccuracyLabelRect.midY - shotAccuracyLabelRect.height, width: sceneWidth/5, height: sceneHeight/5)
+        humanPlayerSkillLabel.text = "Human Player Skill (1-5):"
+        humanPlayerSkillLabel.fontColor = autoLabel.fontColor
+        humanPlayerSkillLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: humanPlayerSkillLabel, rect: humanPlayerSkillLabelRect)
+        humanPlayerSkillLabel.position = CGPoint(x: humanPlayerSkillLabelRect.minX, y: humanPlayerSkillLabelRect.midY)
+        humanPlayerSkillLabel.zPosition = 2
+        
+        humanPlayerSkill = UIStepper(frame: CGRect(x: humanPlayerSkillLabelRect.minX + sceneWidth/7.5, y: shotAccuracy.frame.minY + robotSpeedLabelRect.height/2, width: sceneWidth/5, height: sceneHeight/5))
+        humanPlayerSkill.autorepeat = true
+        humanPlayerSkill.minimumValue = 0
+        humanPlayerSkill.maximumValue = 5
+        humanPlayerSkill.stepValue = 1
+        humanPlayerSkill.value = 0
+        humanPlayerSkill.addTarget(self, action: #selector(humanPlayerSkillChanged), for: .valueChanged)
+        
+        let humanPlayerSkillAmountLabelRect = CGRect(x: robotSpeedAmount.position.x, y: shotAccuracyAmount.position.y - sceneHeight/5, width: sceneWidth/5, height: sceneHeight/5)
+        humanPlayerSkillAmount.text = "\(humanPlayerSkillValue)"
+        humanPlayerSkillAmount.fontColor = autoLabel.fontColor
+        humanPlayerSkillAmount.fontName = "Arial"
+        humanPlayerSkillAmount.fontSize = robotSpeedLabel.fontSize
+        humanPlayerSkillAmount.position = CGPoint(x: humanPlayerSkillAmountLabelRect.minX, y: humanPlayerSkillAmountLabelRect.midY)
+        humanPlayerSkillAmount.zPosition = 2
+        
+        nextButton = ThemedButton(size: CGSize(width: sceneWidth/10, height: sceneHeight/10), x: sceneWidth - sceneWidth/10, y: sceneHeight/10, name: "Proceed")
         nextButton.button.fillColor = teleopLabel.fontColor!
         nextButton.button.strokeColor = nextButton.button.fillColor
         nextButton.label.fontColor = autoLabel.fontColor
@@ -588,6 +816,13 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         previousButton.label.fontColor = autoLabel.fontColor
         previousButton.button.zPosition = 2
         previousButton.label.zPosition = 2
+        
+        finishButton = ThemedButton(size: CGSize(width: sceneWidth/10, height: sceneHeight/10), x: sceneWidth - sceneWidth/10, y: sceneHeight/10, name: "Finish")
+        finishButton.button.fillColor = teleopLabel.fontColor!
+        finishButton.button.strokeColor = teleopLabel.fontColor!
+        finishButton.label.fontColor = autoLabel.fontColor
+        finishButton.button.zPosition = 2
+        finishButton.label.zPosition = 2
         
         
         self.peerID = MCPeerID(displayName: UIDevice.current.name)
@@ -609,6 +844,10 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         madeGearsAmountLabel.text = "\(madeGearsValue)"
         droppedGearsAmountLabel.text = "\(missedGearsValue)"
         shotSpeedAmountLabel.text = "\(shotSpeedValue)"
+        gearTimeAmountLabel.text = "\(gearTimeValue)"
+        robotSpeedAmount.text = "\(robotSpeedValue)"
+        shotAccuracyAmount.text = "\(shotAccuracyValue)"
+        humanPlayerSkillAmount.text = "\(humanPlayerSkillValue)"
     }
     func zone1StepperChanged(sender: UIStepper!) {
         zone1TeleopValue = Int(sender.value)
@@ -627,6 +866,18 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     }
     func shotSpeedChanged(sender: UIStepper!) {
         shotSpeedValue = Int(sender.value)
+    }
+    func gearTimeChanged(sender: UIStepper!) {
+        gearTimeValue = Int(sender.value)
+    }
+    func robotSpeedChanged(sender: UIStepper!) {
+        robotSpeedValue = Int(sender.value)
+    }
+    func shotAccuracyChanged(sender: UIStepper!) {
+        shotAccuracyValue = Int(sender.value)
+    }
+    func humanPlayerSkillChanged(sender: UIStepper!) {
+        humanPlayerSkillValue = Int(sender.value)
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
@@ -716,13 +967,26 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     self.addChild(droppedGearsLabel)
                     self.addChild(droppedGearsAmountLabel)
                     view?.addSubview(droppedGearsAmount)
+                    self.addChild(gearTimeLabel)
+                    view?.addSubview(gearTime)
+                    self.addChild(gearTimeAmountLabel)
                     self.addChild(shotSpeedLabel)
                     self.addChild(shotSpeedAmountLabel)
                     view?.addSubview(shotSpeed)
+                    self.addChild(attemptedClimbLabel)
+                    self.addChild(attemptedClimbBox.node)
+                    self.addChild(canClimbLabel)
+                    self.addChild(canClimbBox.node)
+                    self.addChild(climbedNoTouchPadLabel)
+                    self.addChild(climbedNoTouchPadBox.node)
                     self.addChild(nextButton.button)
                     self.addChild(nextButton.label)
                     self.addChild(previousButton.button)
                     self.addChild(previousButton.label)
+                    self.addChild(gearsFromFloorLabel)
+                    self.addChild(gearsFromFloorBox.node)
+                    self.addChild(fuelFromFloorLabel)
+                    self.addChild(fuelFromFloorBox.node)
                 }
             }
             if name == "DidNotMoveBox" {
@@ -753,52 +1017,33 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
             if name == "MadeHopperBox" {
                 madeHopperBox.changeValue()
             }
-            if name == "Finish" {
+            if name == "AttemptedClimbBox" {
+                attemptedClimbBox.changeValue()
+            }
+            if name == "CanClimbBox" {
+                canClimbBox.changeValue()
+            }
+            if name == "ClimbedNoTouchPadBox" {
+                climbedNoTouchPadBox.changeValue()
+            }
+            if name == "GearsFromFloorBox" {
+                gearsFromFloorBox.changeValue()
+            }
+            if name == "FuelFromFloorBox" {
+                fuelFromFloorBox.changeValue()
+            }
+            if name == "Proceed" {
                 if tag == 4 {
-                    estimatedFuelValue = Int(estimatedFuelMade.text!)!
-                    estimatedLowGoalValue = Int(attemptLowEstimation.text!)!
-                    
-                    completeDataString.append("\(allianceString!), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue), \(madeHopperBox.value!), \(estimatedLowGoalValue), \(zone1TeleopValue), \(zone2TeleopValue), \(zone3TeleopValue), \(madeGearsValue), \(missedGearsValue), \(shotSpeedValue)\n")
-                    
-                    let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
-                    do {
-                        try self.session.send(completeString!, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
-                        
-                        showAlert(title: "Complete", message: "The data has been sent! ;) #Robots")
-                        tag = 1
-                        self.removeAllChildren()
-                        estimatedFuelMade.removeFromSuperview()
-                        attemptLowEstimation.removeFromSuperview()
-                        zone1FuelAmount.removeFromSuperview()
-                        zone2FuelAmount.removeFromSuperview()
-                        zone3FuelAmount.removeFromSuperview()
-                        madeGearsAmount.removeFromSuperview()
-                        droppedGearsAmount.removeFromSuperview()
-                        shotSpeed.removeFromSuperview()
-                        
-                        titleLabel.text = "Pre Match Data"
-                        self.addChild(titleLabel)
-                        enterMatchAlliance.text = ""
-                        enterTeamNumber.text = ""
-                        enterYourName.text = ""
-                        view?.addSubview(enterMatchAlliance)
-                        self.addChild(themedButton.button)
-                        self.addChild(themedButton.label)
-
-                    }
-                    catch {
-                        print("ERROR")
-                        
-                        showAlert(title: "Failed", message: "The data failed to send...please tell someone")
- 
-                    }
-
-                    
-                    /*
                     tag = 5
                     removeAllChildren()
                     titleLabel.text = "Finish"
                     self.addChild(titleLabel)
+                    self.addChild(previousButton.button)
+                    self.addChild(previousButton.label)
+                    self.addChild(finishButton.button)
+                    self.addChild(finishButton.label)
+                    previousButton.reverseColors()
+                    finishButton.reverseColors()
                     estimatedFuelMade.removeFromSuperview()
                     attemptLowEstimation.removeFromSuperview()
                     zone1FuelAmount.removeFromSuperview()
@@ -807,9 +1052,68 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     madeGearsAmount.removeFromSuperview()
                     droppedGearsAmount.removeFromSuperview()
                     shotSpeed.removeFromSuperview()
-                    enterTeamNumber.placeholder = "Please enter any comments"
-                    view?.addSubview(enterTeamNumber)
-                    */
+                    gearTime.removeFromSuperview()
+                    view?.addSubview(enterComments)
+                    view?.addSubview(robotSpeed)
+                    self.addChild(robotSpeedLabel)
+                    self.addChild(robotSpeedAmount)
+                    self.addChild(shotAccuracyLabel)
+                    self.addChild(shotAccuracyAmount)
+                    view?.addSubview(shotAccuracy)
+                    self.addChild(humanPlayerSkillLabel)
+                    self.addChild(humanPlayerSkillAmount)
+                    view?.addSubview(humanPlayerSkill)
+                    
+                }
+            }
+            if name == "Finish" {
+                if tag == 5 {
+                completeDataString = ""
+                estimatedFuelValue = Int(estimatedFuelMade.text!)!
+                estimatedLowGoalValue = Int(attemptLowEstimation.text!)!
+                commentString = enterComments.text!
+                tag = 1
+                
+                completeDataString.append("\(allianceString), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue), \(madeHopperBox.value!), \(estimatedLowGoalValue), \(zone1TeleopValue), \(zone2TeleopValue), \(zone3TeleopValue), \(madeGearsValue), \(missedGearsValue), \(gearTimeValue), \(shotSpeedValue), \(gearsFromFloorBox.value!), \(fuelFromFloorBox.value!), \(attemptedClimbBox.value!),\(canClimbBox.value!),\(climbedNoTouchPadBox.value!),\(robotSpeedValue),\(shotAccuracyValue),\(humanPlayerSkillValue),\(commentString)\n")
+                
+                let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
+                do {
+                    try self.session.send(completeString!, toPeers: self.session.connectedPeers, with: MCSessionSendDataMode.reliable)
+                    
+                    showAlert(title: "Complete", message: "Your data has been sent")
+                    self.removeAllChildren()
+                    enterComments.removeFromSuperview()
+                    robotSpeed.removeFromSuperview()
+                    shotAccuracy.removeFromSuperview()
+                    humanPlayerSkill.removeFromSuperview()
+                    
+                    allianceString = ""
+                    enterMatchAlliance.text = ""
+                    robotNumber = ""
+                    enterTeamNumber.text = ""
+                    nameString = ""
+                    enterYourName.text = ""
+                    commentString = ""
+                    enterComments.text = ""
+                    robotSpeedAmount = 0
+                    shotAccuracyAmount = 0
+                    humanPlayerSkillAmount = 0
+                    
+                    setToZero()
+                    
+                    titleLabel.text = "Pre Match Data"
+                    self.addChild(titleLabel)
+                    view?.addSubview(enterMatchAlliance)
+                    self.addChild(themedButton.button)
+                    self.addChild(themedButton.label)
+                    
+                }
+                catch {
+                    print("ERROR")
+                    
+                    showAlert(title: "Failed", message: "The data failed to send...please tell someone")
+                    
+                }
                 }
             }
             if name == "Previous" {
@@ -824,6 +1128,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     madeGearsAmount.removeFromSuperview()
                     droppedGearsAmount.removeFromSuperview()
                     shotSpeed.removeFromSuperview()
+                    gearTime.removeFromSuperview()
                     
                     titleLabel.text = "Pre Match Data"
                     self.addChild(titleLabel)
@@ -831,9 +1136,167 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     self.addChild(themedButton.button)
                     self.addChild(themedButton.label)
                 }
+                if tag == 5 {
+                    tag = 4
+                    removeAllChildren()
+                    enterComments.removeFromSuperview()
+                    robotSpeed.removeFromSuperview()
+                    shotAccuracy.removeFromSuperview()
+                    humanPlayerSkill.removeFromSuperview()
+                    self.addChild(autonomousDiv)
+                    self.addChild(teleopDiv)
+                    self.addChild(logo)
+                    self.addChild(zoneKey)
+                    self.addChild(zoneKeyLabel)
+                    self.addChild(logoLabel)
+                    self.addChild(autoLabel)
+                    self.addChild(didNotMoveLabel)
+                    self.addChild(didNotMoveBox.node)
+                    self.addChild(crossBaseLineLabel)
+                    self.addChild(crossBaseLineBox.node)
+                    self.addChild(attemptGearLabel)
+                    self.addChild(attemptGearBox.node)
+                    self.addChild(madeGearLabel)
+                    self.addChild(madeGearBox.node)
+                    self.addChild(attemptShotLabel)
+                    self.addChild(attemptShotBox.node)
+                    self.addChild(zoneLabel)
+                    self.addChild(zone1Label)
+                    self.addChild(zone1Box.node)
+                    self.addChild(zone2Label)
+                    self.addChild(zone2Box.node)
+                    self.addChild(zone3Label)
+                    self.addChild(zone3Box.node)
+                    self.addChild(estimatedFuelMadeLabel)
+                    view?.addSubview(estimatedFuelMade)
+                    self.addChild(madeHopperLabel)
+                    self.addChild(madeHopperBox.node)
+                    self.addChild(attemptLowLabel)
+                    view?.addSubview(attemptLowEstimation)
+                    self.addChild(teleopLabel)
+                    self.addChild(zone1FuelLabel)
+                    view?.addSubview(zone1FuelAmount)
+                    self.addChild(zone1FuelAmountLabel)
+                    self.addChild(zone2FuelLabel)
+                    self.addChild(zone2FuelAmountLabel)
+                    view?.addSubview(zone2FuelAmount)
+                    self.addChild(zone3FuelLabel)
+                    self.addChild(zone3FuelAmountLabel)
+                    view?.addSubview(zone3FuelAmount)
+                    self.addChild(madeGearsLabel)
+                    self.addChild(madeGearsAmountLabel)
+                    view?.addSubview(madeGearsAmount)
+                    self.addChild(droppedGearsLabel)
+                    self.addChild(droppedGearsAmountLabel)
+                    view?.addSubview(droppedGearsAmount)
+                    self.addChild(gearTimeLabel)
+                    view?.addSubview(gearTime)
+                    self.addChild(gearTimeAmountLabel)
+                    self.addChild(shotSpeedLabel)
+                    self.addChild(shotSpeedAmountLabel)
+                    view?.addSubview(shotSpeed)
+                    self.addChild(nextButton.button)
+                    self.addChild(nextButton.label)
+                    self.addChild(previousButton.button)
+                    self.addChild(previousButton.label)
+                    self.addChild(attemptedClimbLabel)
+                    self.addChild(attemptedClimbBox.node)
+                    self.addChild(canClimbLabel)
+                    self.addChild(canClimbBox.node)
+                    self.addChild(climbedNoTouchPadLabel)
+                    self.addChild(climbedNoTouchPadBox.node)
+                    self.addChild(gearsFromFloorLabel)
+                    self.addChild(gearsFromFloorBox.node)
+                    self.addChild(fuelFromFloorLabel)
+                    self.addChild(fuelFromFloorBox.node)
+                    previousButton.reverseColors()
+                }
             }
         }
 
+    }
+    func setToZero() {
+        if didNotMoveBox.value == 1 {
+            didNotMoveBox.changeValue()
+        }
+        didNotMoveValue = 0
+        if attemptShotBox.value == 1 {
+            attemptShotBox.changeValue()
+        }
+        attemptShotValue = 0
+        if crossBaseLineBox.value == 1 {
+            crossBaseLineBox.changeValue()
+        }
+        crossBaseLineValue = 0
+        if zone1Box.value == 1 {
+            zone1Box.changeValue()
+        }
+        zone1Value = 0
+        if zone2Box.value == 1 {
+            zone2Box.changeValue()
+        }
+        zone2Value = 0
+        if zone3Box.value == 1 {
+            zone3Box.changeValue()
+        }
+        zone3Value = 0
+        if attemptGearBox.value == 1 {
+            attemptGearBox.changeValue()
+        }
+        attemptGearValue = 0
+        if madeGearBox.value == 1 {
+            madeGearBox.changeValue()
+        }
+        madeGearValue = 0
+        if madeHopperBox.value == 1 {
+            madeHopperBox.changeValue()
+        }
+        madeHopperValue = 0
+        if attemptedClimbBox.value == 1 {
+            attemptedClimbBox.changeValue()
+        }
+        attemptedClimbValue = 0
+        if canClimbBox.value == 1 {
+            canClimbBox.changeValue()
+        }
+        canClimbValue = 0
+        if climbedNoTouchPadBox.value == 1 {
+            climbedNoTouchPadBox.changeValue()
+        }
+        climbedNoTouchPadValue = 0
+        if gearsFromFloorBox.value == 1 {
+            gearsFromFloorBox.changeValue()
+        }
+        gearFromFloorValue = 0
+        if fuelFromFloorBox.value == 1 {
+            fuelFromFloorBox.changeValue()
+        }
+        fuelFromFloorValue = 0
+        
+        let defaults = UserDefaults.standard
+        defaults.set(0, forKey: "didNotMove")
+        defaults.set(0, forKey: "crossBaseLine")
+        defaults.set(0, forKey: "attemptGear")
+        defaults.set(0, forKey: "madeGear")
+        defaults.set(0, forKey: "attemptShot")
+        defaults.set(0, forKey: "zone1")
+        defaults.set(0, forKey: "zone2")
+        defaults.set(0, forKey: "zone3")
+        defaults.set(0, forKey: "madeHopper")
+        defaults.set(0, forKey: "zone1Teleop")
+        defaults.set(0, forKey: "zone2Teleop")
+        defaults.set(0, forKey: "zone3Teleop")
+        defaults.set(0, forKey: "attemptedClimb")
+        defaults.set(0, forKey: "canClimb")
+        defaults.set(0, forKey: "climbedNoTouchPad")
+        defaults.set(0, forKey: "gearFromFloor")
+        defaults.set(0, forKey: "fuelFromFloor")
+        defaults.set("", forKey: "AllianceString")
+        defaults.set("", forKey: "RobotNumber")
+        defaults.set("", forKey: "NameString")
+        
+        defaults.set(1, forKey: "tag")
+        defaults.synchronize()
     }
     
     func addChildren() {
@@ -922,6 +1385,9 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
             self.addChild(droppedGearsLabel)
             self.addChild(droppedGearsAmountLabel)
             view?.addSubview(droppedGearsAmount)
+            self.addChild(gearTimeLabel)
+            view?.addSubview(gearTime)
+            self.addChild(gearTimeAmountLabel)
             self.addChild(shotSpeedLabel)
             self.addChild(shotSpeedAmountLabel)
             view?.addSubview(shotSpeed)
@@ -929,6 +1395,28 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
             self.addChild(nextButton.label)
             self.addChild(previousButton.button)
             self.addChild(previousButton.label)
+            self.addChild(attemptedClimbLabel)
+            self.addChild(attemptedClimbBox.node)
+            self.addChild(canClimbLabel)
+            self.addChild(canClimbBox.node)
+            self.addChild(climbedNoTouchPadLabel)
+            self.addChild(climbedNoTouchPadBox.node)
+            self.addChild(gearsFromFloorLabel)
+            self.addChild(gearsFromFloorBox.node)
+            self.addChild(fuelFromFloorLabel)
+            self.addChild(fuelFromFloorBox.node)
+        }
+        else if tag == 5 {
+            view?.addSubview(enterComments)
+            view?.addSubview(robotSpeed)
+            self.addChild(robotSpeedLabel)
+            self.addChild(robotSpeedAmount)
+            self.addChild(shotAccuracyLabel)
+            self.addChild(shotAccuracyAmount)
+            view?.addSubview(shotAccuracy)
+            self.addChild(humanPlayerSkillLabel)
+            self.addChild(humanPlayerSkillAmount)
+            view?.addSubview(humanPlayerSkill)
         }
     }
     
@@ -948,7 +1436,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                  didStartReceivingResourceWithName resourceName: String,
                  fromPeer peerID: MCPeerID, with progress: Progress)  {
         
-        // Called when a peer starts sending a file to us
+        // Called when a peer starts sending a file to  us
     }
     
     func session(_ session: MCSession,
