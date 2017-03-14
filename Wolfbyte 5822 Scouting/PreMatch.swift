@@ -98,6 +98,9 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     var gearsFromFloorBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
     var fuelFromFloorLabel = SKLabelNode()
     var fuelFromFloorBox = CheckBox(sceneWidth: 0, sceneHeight: 0, name: "")
+    var lowFuelLabel = SKLabelNode()
+    var lowFuel = UIStepper()
+    var lowFuelAmount = SKLabelNode()
     
     var robotSpeedLabel = SKLabelNode()
     var robotSpeed = UIStepper()
@@ -135,6 +138,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     var fuelFromFloorValue = 0
     var shotAccuracyValue = 0
     var humanPlayerSkillValue = 0
+    var lowShotValue = 0
     
     var nextButton = ThemedButton()
     var previousButton = ThemedButton()
@@ -731,6 +735,29 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         fuelFromFloorBox.setValue(aValue: fuelFromFloorValue)
         fuelFromFloorBox.node.zPosition = 2
         
+        let lowFuelLabelRect = CGRect(x: sceneWidth/10, y: fuelFromFloorLabelRect.midY - fuelFromFloorLabelRect.height, width: sceneWidth/10, height: sceneHeight/10)
+        lowFuelLabel.text = "Low Fuel Shots:"
+        lowFuelLabel.fontColor = teleopLabel.fontColor
+        lowFuelLabel.fontName = "Arial"
+        adjustLabelFontSizeToFitRect(labelNode: lowFuelLabel, rect: lowFuelLabelRect)
+        lowFuelLabel.position = CGPoint(x: lowFuelLabelRect.minX, y: lowFuelLabelRect.midY)
+        lowFuelLabel.zPosition = 2
+        
+        lowFuel = UIStepper(frame: CGRect(x: lowFuelLabelRect.minX + sceneWidth/15, y: sceneHeight - (lowFuelLabelRect.midY + lowFuelLabelRect.height/4), width: sceneWidth/10, height: sceneHeight/10))
+        lowFuel.autorepeat = true
+        lowFuel.minimumValue = 0
+        lowFuel.stepValue = 1
+        lowFuel.value = 0
+        lowFuel.addTarget(self, action: #selector(lowShotChanged), for: .valueChanged)
+        
+        let lowFuelAmountLabelRect = CGRect(x: lowFuel.frame.maxX + sceneWidth/30, y: lowFuelLabelRect.minY, width: sceneWidth/10, height: sceneHeight/10)
+        lowFuelAmount.text = "\(lowShotValue)"
+        lowFuelAmount.fontColor = teleopLabel.fontColor
+        lowFuelAmount.fontName = "Arial"
+        lowFuelAmount.fontSize = teleopLabel.fontSize
+        lowFuelAmount.position = CGPoint(x: lowFuelAmountLabelRect.minX, y: lowFuelAmountLabelRect.midY)
+        lowFuelAmount.zPosition = 2
+        
         let robotSpeedLabelRect = CGRect(x: sceneWidth/10, y: sceneHeight/2, width: sceneWidth/5, height: sceneHeight/5)
         robotSpeedLabel.text = "Robot Speed (1-5):"
         robotSpeedLabel.fontColor = autoLabel.fontColor
@@ -848,6 +875,8 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
         robotSpeedAmount.text = "\(robotSpeedValue)"
         shotAccuracyAmount.text = "\(shotAccuracyValue)"
         humanPlayerSkillAmount.text = "\(humanPlayerSkillValue)"
+        lowFuelAmount.text = "\(lowShotValue)"
+        
     }
     func zone1StepperChanged(sender: UIStepper!) {
         zone1TeleopValue = Int(sender.value)
@@ -878,6 +907,9 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
     }
     func humanPlayerSkillChanged(sender: UIStepper!) {
         humanPlayerSkillValue = Int(sender.value)
+    }
+    func lowShotChanged(sender: UIStepper!) {
+        lowShotValue = Int(sender.value)
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
@@ -987,6 +1019,9 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     self.addChild(gearsFromFloorBox.node)
                     self.addChild(fuelFromFloorLabel)
                     self.addChild(fuelFromFloorBox.node)
+                    self.addChild(lowFuelLabel)
+                    self.addChild(lowFuelAmount)
+                    view?.addSubview(lowFuel)
                 }
             }
             if name == "DidNotMoveBox" {
@@ -1053,6 +1088,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     droppedGearsAmount.removeFromSuperview()
                     shotSpeed.removeFromSuperview()
                     gearTime.removeFromSuperview()
+                    lowFuel.removeFromSuperview()
                     view?.addSubview(enterComments)
                     view?.addSubview(robotSpeed)
                     self.addChild(robotSpeedLabel)
@@ -1074,7 +1110,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                 commentString = enterComments.text!
                 tag = 1
                 
-                completeDataString.append("\(allianceString), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue), \(madeHopperBox.value!), \(estimatedLowGoalValue), \(zone1TeleopValue), \(zone2TeleopValue), \(zone3TeleopValue), \(madeGearsValue), \(missedGearsValue), \(gearTimeValue), \(shotSpeedValue), \(gearsFromFloorBox.value!), \(fuelFromFloorBox.value!), \(attemptedClimbBox.value!),\(canClimbBox.value!),\(climbedNoTouchPadBox.value!),\(robotSpeedValue),\(shotAccuracyValue),\(humanPlayerSkillValue),\(commentString)\n")
+                completeDataString.append("\(allianceString), \(robotNumber), \(nameString), \(didNotMoveBox.value!), \(crossBaseLineBox.value!), \(attemptGearBox.value!), \(madeGearBox.value!), \(attemptShotBox.value!), \(zone1Box.value!), \(zone2Box.value!), \(zone3Box.value!), \(estimatedFuelValue), \(madeHopperBox.value!), \(estimatedLowGoalValue), \(zone1TeleopValue), \(zone2TeleopValue), \(zone3TeleopValue), \(lowShotValue), \(madeGearsValue), \(missedGearsValue), \(gearTimeValue), \(shotSpeedValue), \(gearsFromFloorBox.value!), \(fuelFromFloorBox.value!), \(attemptedClimbBox.value!),\(canClimbBox.value!),\(climbedNoTouchPadBox.value!),\(robotSpeedValue),\(shotAccuracyValue),\(humanPlayerSkillValue),\(commentString)\n")
                 
                 let completeString = completeDataString.data(using: String.Encoding.utf8.rawValue)
                 do {
@@ -1095,9 +1131,9 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     enterYourName.text = ""
                     commentString = ""
                     enterComments.text = ""
-                    robotSpeedAmount = 0
-                    shotAccuracyAmount = 0
-                    humanPlayerSkillAmount = 0
+                    robotSpeedValue = 0
+                    shotAccuracyValue = 0
+                    humanPlayerSkillValue = 0
                     
                     setToZero()
                     
@@ -1129,7 +1165,7 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     droppedGearsAmount.removeFromSuperview()
                     shotSpeed.removeFromSuperview()
                     gearTime.removeFromSuperview()
-                    
+                    lowFuel.removeFromSuperview()
                     titleLabel.text = "Pre Match Data"
                     self.addChild(titleLabel)
                     view?.addSubview(enterMatchAlliance)
@@ -1209,7 +1245,11 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
                     self.addChild(gearsFromFloorBox.node)
                     self.addChild(fuelFromFloorLabel)
                     self.addChild(fuelFromFloorBox.node)
+                    self.addChild(lowFuelLabel)
+                    self.addChild(lowFuelAmount)
+                    view?.addSubview(lowFuel)
                     previousButton.reverseColors()
+                    
                 }
             }
         }
@@ -1272,6 +1312,29 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
             fuelFromFloorBox.changeValue()
         }
         fuelFromFloorValue = 0
+        
+        zone1TeleopValue = 0
+        zone1FuelAmount.value = 0
+        zone2TeleopValue = 0
+        zone2FuelAmount.value = 0
+        zone3TeleopValue = 0
+        zone3FuelAmount.value = 0
+        madeGearsValue = 0
+        madeGearsAmount.value = 0
+        missedGearsValue = 0
+        droppedGearsAmount.value = 0
+        gearTimeValue = 0
+        gearTime.value = 0
+        shotSpeedValue = 0
+        shotSpeed.value = 0
+        robotSpeedValue = 0
+        robotSpeed.value = 0
+        shotAccuracyValue = 0
+        shotAccuracy.value = 0
+        humanPlayerSkillValue = 0
+        humanPlayerSkill.value = 0
+        lowShotValue = 0
+        lowFuel.value = 0
         
         let defaults = UserDefaults.standard
         defaults.set(0, forKey: "didNotMove")
@@ -1405,6 +1468,9 @@ class PreMatch : SKScene, MCSessionDelegate, Alerts {
             self.addChild(gearsFromFloorBox.node)
             self.addChild(fuelFromFloorLabel)
             self.addChild(fuelFromFloorBox.node)
+            self.addChild(lowFuelLabel)
+            self.addChild(lowFuelAmount)
+            view?.addSubview(lowFuel)
         }
         else if tag == 5 {
             view?.addSubview(enterComments)
